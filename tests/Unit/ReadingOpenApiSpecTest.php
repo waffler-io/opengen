@@ -13,25 +13,13 @@ use Waffler\Opengen\Generator;
  */
 class ReadingOpenApiSpecTest extends TestCase
 {
-    public function testItMustGenerateKlingoApiSpec(): void
-    {
-        $generator = new Generator();
-
-        $generator->fromOpenApiFile(
-            '/home/erick/Downloads/openapi-test.json',
-            '/home/erick/Downloads/KlingoTest',
-            'Klingo'
-        );
-
-        $this->expectNotToPerformAssertions();
-    }
     public function testItMustGenerateSwaggerPetshopApiSpec(): void
     {
         $generator = new Generator();
 
         $generator->fromOpenApiFile(
-            '/home/erick/Downloads/swagger.json',
-            '/home/erick/Downloads/SwaggerPetshop',
+            __DIR__ . '/../Fixtures/swagger-petshop.json',
+            __DIR__.'/../Fixtures/SwaggerPetshop',
             'Swagger\\Petshop'
         );
 
