@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Waffler.
+ *
+ * (c) Erick Johnson Almeida de Menezes <erickmenezes.dev@gmail.com>
+ *
+ * This source file is subject to the MIT licence that is bundled
+ * with this source code in the file LICENCE.
+ */
+
 namespace Waffler\Opengen\Pipeline\Stages;
 
 use Symfony\Component\Filesystem\Filesystem;
@@ -14,7 +23,8 @@ class OutputClassToDirectory implements StageInterface
 {
     public function __construct(
         private string $outputDir,
-    ) { }
+    ) {
+    }
 
     /**
      * @param array<non-empty-string, non-empty-string> $value

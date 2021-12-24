@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Waffler.
+ *
+ * (c) Erick Johnson Almeida de Menezes <erickmenezes.dev@gmail.com>
+ *
+ * This source file is subject to the MIT licence that is bundled
+ * with this source code in the file LICENCE.
+ */
+
 namespace Waffler\Opengen\Pipeline\Stages;
 
 use Nette\PhpGenerator\ClassType;
@@ -156,7 +165,7 @@ class GenerateWafflerInterfacesForEachArrayKey implements StageInterface
                 }
 
                 $method->setPublic();
-                if (in_array('application/json', $operation->getSerializableData()?->produces ?? [])) {
+                if (in_array('application/json', $operation->getSerializableData()?->produces ?? [], true)) {
                     $method->setReturnType('array');
                     $method->addComment("\n@return array");
                 } else {
