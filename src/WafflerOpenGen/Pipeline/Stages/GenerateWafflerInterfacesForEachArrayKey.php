@@ -106,14 +106,15 @@ class GenerateWafflerInterfacesForEachArrayKey implements StageInterface
                         $method->addComment("@param array \$headers {$operationParameter->description}");
                         $phpNamespace->addUse(Headers::class);
                     } elseif ($operationParameter->in === 'path') {
+                        $pathParamType = $operationParameter->getSerializableData()?->type === 'integer' ? 'int' : 'string';
                         $_pathParam = $method->addParameter($this->toFunctionName($operationParameter->name))
-                            ->setType($operationParameter->getSerializableData()?->type === 'integer' ? 'int' : 'string');
+                            ->setType($pathParamType);
                         if (!$operationParameter->required) {
                             $_pathParam->setNullable();
                             $_pathParam->setDefaultValue(null);
-                            $method->addComment("@param ?string \${$operationParameter->name} {$operationParameter->description}");
+                            $method->addComment("@param ?$pathParamType \${$operationParameter->name} {$operationParameter->description}");
                         } else {
-                            $method->addComment("@param string \${$operationParameter->name} {$operationParameter->description}");
+                            $method->addComment("@param $pathParamType \${$operationParameter->name} {$operationParameter->description}");
                         }
                         $phpNamespace->addUse(PathParam::class);
                         $_pathParam->addAttribute(PathParam::class, [$operationParameter->name]);
