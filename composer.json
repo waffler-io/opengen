@@ -5,8 +5,8 @@
     "require": {
         "waffler/waffler": "^0.5.1",
         "cebe/php-openapi": "^1.5",
-        "nette/php-generator": "^4.0",
-        "symfony/filesystem": "^6.1"
+        "symfony/filesystem": "^6.0",
+        "nette/php-generator": "^3.6"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5.10",
@@ -37,5 +37,5 @@
             "email": "erickmenezes.dev@gmail.com"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }
