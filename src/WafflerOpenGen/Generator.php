@@ -11,11 +11,6 @@
 
 namespace Waffler\Opengen;
 
-use cebe\openapi\Reader;
-use cebe\openapi\spec\PathItem;
-use cebe\openapi\SpecObjectInterface;
-use InvalidArgumentException;
-use SplFileInfo;
 use Waffler\Opengen\Contracts\GeneratorInterface;
 use Waffler\Opengen\Pipeline\Stages\GenerateWafflerInterfacesForEachArrayKey;
 use Waffler\Opengen\Pipeline\Stages\GetOpenApiReader;
