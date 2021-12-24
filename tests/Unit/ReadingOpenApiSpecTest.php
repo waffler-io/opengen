@@ -11,13 +11,13 @@
 
 namespace Waffler\OpenGen\Tests\Unit;
 
-use Closure;
 use PHPUnit\Framework\TestCase;
 use Waffler\Client\Factory;
 use Waffler\Opengen\Generator;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\PetClientInterface;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\StoreClientInterface;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\UserClientInterface;
+use Waffler\OpenGen\Tests\Fixtures\JsonPlaceholder\UserClientInterface as JsonPlaceholderUser;
 
 /**
  * Class ReadingOpenApiSpecTest.
@@ -27,7 +27,8 @@ use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\UserClientInterface;
  */
 class ReadingOpenApiSpecTest extends TestCase
 {
-    private const OUTPUT_DIR = __DIR__.'/../Fixtures/SwaggerPetshop';
+    private const PETSHOP_OUTPUT_DIR = __DIR__.'/../Fixtures/SwaggerPetshop';
+    private const JSONPLACEHOLDER_OUTPUT_DIR = __DIR__.'/../Fixtures/JsonPlaceholder';
 
     public function testItMustGenerateSwaggerPetshopApiSpec(): void
     {
@@ -35,14 +36,14 @@ class ReadingOpenApiSpecTest extends TestCase
 
         $generator->fromOpenApiFile(
             __DIR__ . '/../Fixtures/swagger-petshop.json',
-            self::OUTPUT_DIR,
+            self::PETSHOP_OUTPUT_DIR,
             'Waffler\\OpenGen\\Tests\\Fixtures\\SwaggerPetshop'
         );
 
-        $this->assertDirectoryExists(self::OUTPUT_DIR);
-        $this->assertFileExists(self::OUTPUT_DIR.'/PetClientInterface.php');
-        $this->assertFileExists(self::OUTPUT_DIR.'/StoreClientInterface.php');
-        $this->assertFileExists(self::OUTPUT_DIR.'/UserClientInterface.php');
+        $this->assertDirectoryExists(self::PETSHOP_OUTPUT_DIR);
+        $this->assertFileExists(self::PETSHOP_OUTPUT_DIR.'/PetClientInterface.php');
+        $this->assertFileExists(self::PETSHOP_OUTPUT_DIR.'/StoreClientInterface.php');
+        $this->assertFileExists(self::PETSHOP_OUTPUT_DIR.'/UserClientInterface.php');
         $this->assertTrue(interface_exists(PetClientInterface::class));
         $this->assertTrue(interface_exists(StoreClientInterface::class));
         $this->assertTrue(interface_exists(UserClientInterface::class));
@@ -58,5 +59,30 @@ class ReadingOpenApiSpecTest extends TestCase
             UserClientInterface::class,
             Factory::make(UserClientInterface::class)
         );
+    }
+
+    public function testItMustGenerateJsonPlaceholderApiSpec(): void
+    {
+        $generator = new Generator();
+
+        $generator->fromOpenApiFile(
+            __DIR__ . '/../Fixtures/swagger-jsonplaceholder.json',
+            self::JSONPLACEHOLDER_OUTPUT_DIR,
+            'Waffler\\OpenGen\\Tests\\Fixtures\\JsonPlaceholder'
+        );
+
+        $this->assertDirectoryExists(self::JSONPLACEHOLDER_OUTPUT_DIR);
+        $this->assertFileExists(self::JSONPLACEHOLDER_OUTPUT_DIR.'/UserClientInterface.php');
+        $this->assertTrue(interface_exists(JsonPlaceholderUser::class));
+        $client = Factory::make(JsonPlaceholderUser::class, [
+            'base_uri' => 'https://jsonplaceholder.typicode.com/'
+        ]);
+        $this->assertInstanceOf(
+            JsonPlaceholderUser::class,
+            $client
+        );
+        $response1 = $client->getUsers(['id' => 1]);
+        $response2 = $client->getUserById(1);
+        self::assertEquals($response1[0], $response2);
     }
 }

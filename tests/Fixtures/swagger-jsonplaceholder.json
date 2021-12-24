@@ -1,0 +1,90 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a simple representation of Jsonplaceholder.typicode.com users api.",
+    "contact": {
+      "url": "https://github.com/ErickJMenezes",
+      "email": "erickmenezes.dev@gmail.com",
+      "name": "Erick Johnson Almeida de Menezes"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "MIT"
+    },
+    "title": "Users api",
+    "version": "0.0.1",
+    "termsOfService": "None"
+  },
+  "tags": [
+    {
+      "name": "user",
+      "description": "The user api"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "operationId": "getUsers",
+        "tags": ["user"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "type": "integer",
+            "in": "query",
+            "required": false,
+            "name": "id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/user"
+              }
+            },
+            "description": "Returns users."
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "getUserById",
+        "tags": ["user"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "description": "User id",
+            "type": "integer",
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/user"
+            },
+            "description": "Returns user by id"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "user": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "User id"
+        }
+      }
+    }
+  }
+}
