@@ -2,6 +2,7 @@
 
 namespace Waffler\OpenGen\Tests\Unit;
 
+use Closure;
 use PHPUnit\Framework\TestCase;
 use Waffler\Opengen\Generator;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\PetClientInterface;
@@ -16,21 +17,32 @@ use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\UserClientInterface;
  */
 class ReadingOpenApiSpecTest extends TestCase
 {
+    private const OUTPUT_DIR = __DIR__.'/../Fixtures/SwaggerPetshop';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $dirname = self::OUTPUT_DIR;
+        // @phpstan-ignore-next-line
+        array_map(Closure::fromCallable('unlink'), (array)glob("$dirname/*.*"));
+        rmdir($dirname);
+    }
+
     public function testItMustGenerateSwaggerPetshopApiSpec(): void
     {
         $generator = new Generator();
 
-        $outputDir = __DIR__.'/../Fixtures/SwaggerPetshop';
         $generator->fromOpenApiFile(
             __DIR__ . '/../Fixtures/swagger-petshop.json',
-            $outputDir,
+            self::OUTPUT_DIR,
             'Waffler\\OpenGen\\Tests\\Fixtures\\SwaggerPetshop'
         );
 
-        $this->assertDirectoryExists($outputDir);
-        $this->assertFileExists($outputDir.'/PetClientInterface.php');
-        $this->assertFileExists($outputDir.'/StoreClientInterface.php');
-        $this->assertFileExists($outputDir.'/UserClientInterface.php');
+        $this->assertDirectoryExists(self::OUTPUT_DIR);
+        $this->assertFileExists(self::OUTPUT_DIR.'/PetClientInterface.php');
+        $this->assertFileExists(self::OUTPUT_DIR.'/StoreClientInterface.php');
+        $this->assertFileExists(self::OUTPUT_DIR.'/UserClientInterface.php');
         interface_exists(PetClientInterface::class);
         interface_exists(StoreClientInterface::class);
         interface_exists(UserClientInterface::class);
