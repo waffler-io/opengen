@@ -3,9 +3,9 @@
 This package reads an open api file (like swagger) and generates ready-to-use
 waffler interfaces.
 
-## How to install `[not published]`
+## How to install
 ```shell
-composer require waffler/codegen
+composer require waffler/opengen
 ```
 
 ## How to use
