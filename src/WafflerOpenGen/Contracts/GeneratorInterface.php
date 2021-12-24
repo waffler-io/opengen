@@ -23,10 +23,10 @@ interface GeneratorInterface
      *
      * @param non-empty-string $openApiFilePath
      * @param non-empty-string $outputDir
-     * @param non-empty-string $classNamespace
+     * @param non-empty-string $classesNamespace
      *
      * @return void
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */
-    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classNamespace): void;
+    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classesNamespace): void;
 }

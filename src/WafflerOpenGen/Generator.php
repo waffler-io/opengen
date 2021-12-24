@@ -28,14 +28,14 @@ class Generator implements GeneratorInterface
     /**
      * @inheritDoc
      */
-    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classNamespace): void
+    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classesNamespace): void
     {
         (new Pipeline())
             ->run($openApiFilePath)
             ->through([
                 new GetOpenApiReader(),
                 new GroupOpenApiPathsByTags(),
-                new GenerateWafflerInterfacesForEachArrayKey($classNamespace),
+                new GenerateWafflerInterfacesForEachArrayKey($classesNamespace),
                 new OutputClassToDirectory($outputDir)
             ])
             ->thenReturn();
