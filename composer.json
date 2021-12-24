@@ -5,7 +5,8 @@
     "require": {
         "waffler/waffler": "^0.5.1",
         "cebe/php-openapi": "^1.5",
-        "nette/php-generator": "^4.0"
+        "nette/php-generator": "^4.0",
+        "symfony/filesystem": "^6.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5.10",
