@@ -9,7 +9,7 @@
  * with this source code in the file LICENCE.
  */
 
-namespace Waffler\Opengen\Pipeline\Stages;
+namespace Waffler\OpenGen\Pipeline\Stages;
 
 use Symfony\Component\Filesystem\Filesystem;
 use Waffler\Pipeline\Contracts\StageInterface;

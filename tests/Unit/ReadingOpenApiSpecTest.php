@@ -13,7 +13,7 @@ namespace Waffler\OpenGen\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Waffler\Client\Factory;
-use Waffler\Opengen\Generator;
+use Waffler\OpenGen\Generator;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\PetClientInterface;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\StoreClientInterface;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\UserClientInterface;

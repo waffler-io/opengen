@@ -9,7 +9,7 @@
  * with this source code in the file LICENCE.
  */
 
-namespace Waffler\Opengen\Contracts;
+namespace Waffler\OpenGen\Contracts;
 
 /**
  * Interface GeneratorInterface.

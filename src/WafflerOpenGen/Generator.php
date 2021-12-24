@@ -9,13 +9,13 @@
  * with this source code in the file LICENCE.
  */
 
-namespace Waffler\Opengen;
+namespace Waffler\OpenGen;
 
-use Waffler\Opengen\Contracts\GeneratorInterface;
-use Waffler\Opengen\Pipeline\Stages\GenerateWafflerInterfacesForEachArrayKey;
-use Waffler\Opengen\Pipeline\Stages\GetOpenApiReader;
-use Waffler\Opengen\Pipeline\Stages\GroupOpenApiPathsByTags;
-use Waffler\Opengen\Pipeline\Stages\OutputClassToDirectory;
+use Waffler\OpenGen\Contracts\GeneratorInterface;
+use Waffler\OpenGen\Pipeline\Stages\GenerateWafflerInterfacesForEachArrayKey;
+use Waffler\OpenGen\Pipeline\Stages\GetOpenApiReader;
+use Waffler\OpenGen\Pipeline\Stages\GroupOpenApiPathsByTags;
+use Waffler\OpenGen\Pipeline\Stages\OutputClassToDirectory;
 use Waffler\Pipeline\Pipeline;
 
 /**
