@@ -33,8 +33,8 @@ class ReadingOpenApiSpecTest extends TestCase
         $this->assertFileExists(self::OUTPUT_DIR.'/PetClientInterface.php');
         $this->assertFileExists(self::OUTPUT_DIR.'/StoreClientInterface.php');
         $this->assertFileExists(self::OUTPUT_DIR.'/UserClientInterface.php');
-        interface_exists(PetClientInterface::class);
-        interface_exists(StoreClientInterface::class);
-        interface_exists(UserClientInterface::class);
+        $this->assertTrue(interface_exists(PetClientInterface::class));
+        $this->assertTrue(interface_exists(StoreClientInterface::class));
+        $this->assertTrue(interface_exists(UserClientInterface::class));
     }
 }
