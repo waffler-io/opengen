@@ -4,6 +4,7 @@ namespace Waffler\OpenGen\Tests\Unit;
 
 use Closure;
 use PHPUnit\Framework\TestCase;
+use Waffler\Client\Factory;
 use Waffler\Opengen\Generator;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\PetClientInterface;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\StoreClientInterface;
@@ -36,5 +37,17 @@ class ReadingOpenApiSpecTest extends TestCase
         $this->assertTrue(interface_exists(PetClientInterface::class));
         $this->assertTrue(interface_exists(StoreClientInterface::class));
         $this->assertTrue(interface_exists(UserClientInterface::class));
+        $this->assertInstanceOf(
+            PetClientInterface::class,
+            Factory::make(PetClientInterface::class)
+        );
+        $this->assertInstanceOf(
+            StoreClientInterface::class,
+            Factory::make(StoreClientInterface::class)
+        );
+        $this->assertInstanceOf(
+            UserClientInterface::class,
+            Factory::make(UserClientInterface::class)
+        );
     }
 }
