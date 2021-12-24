@@ -2,6 +2,7 @@
 
 namespace Waffler\Opengen\Pipeline\Stages;
 
+use stdClass;
 use Waffler\Pipeline\Contracts\StageInterface;
 
 /**
@@ -30,7 +31,8 @@ class GroupOpenApiPathsByTags implements StageInterface
                 'url' => $url,
                 'path' => $path,
                 'operation' => $operation,
-                'tag' => $tag
+                'tag' => $tag,
+                'globalSecurityDefinitions' => $value->getSerializableData()?->securityDefinitions ?? new stdClass()
             ];
         }
         return $paths;

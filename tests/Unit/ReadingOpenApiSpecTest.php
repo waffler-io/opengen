@@ -19,16 +19,6 @@ class ReadingOpenApiSpecTest extends TestCase
 {
     private const OUTPUT_DIR = __DIR__.'/../Fixtures/SwaggerPetshop';
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $dirname = self::OUTPUT_DIR;
-        // @phpstan-ignore-next-line
-        array_map(Closure::fromCallable('unlink'), (array)glob("$dirname/*.*"));
-        rmdir($dirname);
-    }
-
     public function testItMustGenerateSwaggerPetshopApiSpec(): void
     {
         $generator = new Generator();
