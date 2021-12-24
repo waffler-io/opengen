@@ -3,7 +3,9 @@
     "description": "Waffler client generator using openapi specs",
     "type": "library",
     "require": {
-        "waffler/waffler": "^0.5.1"
+        "waffler/waffler": "^0.5.1",
+        "cebe/php-openapi": "^1.5",
+        "nette/php-generator": "^4.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5.10",
