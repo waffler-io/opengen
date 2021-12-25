@@ -189,21 +189,21 @@ EOL;
             {
                 $phpNamespace->addUse(QueryParam::class);
                 $phpParameter->addAttribute(QueryParam::class, [$parameter->name]);
-                $phpParameter->setType($parameterType = $this->santitizeParameterType($parameterType));
+                $phpParameter->setType($parameterType = $this->getParameterType($parameterType));
                 break;
             }
             case 'header':
             {
                 $phpNamespace->addUse(HeaderParam::class);
                 $phpParameter->addAttribute(HeaderParam::class, [$parameter->name]);
-                $phpParameter->setType($parameterType = $this->santitizeParameterType($parameterType));
+                $phpParameter->setType($parameterType = $this->getParameterType($parameterType));
                 break;
             }
             case 'path':
             {
                 $phpNamespace->addUse(PathParam::class);
                 $phpParameter->addAttribute(PathParam::class, [$parameter->name]);
-                $phpParameter->setType($parameterType = $this->santitizeParameterType($parameterType));
+                $phpParameter->setType($parameterType = $this->getParameterType($parameterType));
                 break;
             }
             case 'formData':
@@ -240,7 +240,7 @@ EOL;
         return lcfirst(implode('', $newPieces));
     }
 
-    private function santitizeParameterType(?string $type): string
+    private function getParameterType(?string $type): string
     {
         return match ($type) {
             'integer' => 'int',
