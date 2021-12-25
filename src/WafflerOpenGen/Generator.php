@@ -14,7 +14,6 @@ namespace Waffler\OpenGen;
 use Waffler\OpenGen\Contracts\GeneratorInterface;
 use Waffler\OpenGen\Pipeline\Stages\GenerateWafflerInterfacesForEachArrayKey;
 use Waffler\OpenGen\Pipeline\Stages\GetOpenApiReader;
-use Waffler\OpenGen\Pipeline\Stages\GroupOpenApiPathsByTags;
 use Waffler\OpenGen\Pipeline\Stages\OutputClassToDirectory;
 use Waffler\Pipeline\Pipeline;
 
@@ -34,7 +33,6 @@ class Generator implements GeneratorInterface
             ->run($openApiFilePath)
             ->through([
                 new GetOpenApiReader(),
-                new GroupOpenApiPathsByTags(),
                 new GenerateWafflerInterfacesForEachArrayKey($classesNamespace),
                 new OutputClassToDirectory($outputDir)
             ])

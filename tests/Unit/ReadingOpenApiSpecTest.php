@@ -81,7 +81,7 @@ class ReadingOpenApiSpecTest extends TestCase
             JsonPlaceholderUser::class,
             $client
         );
-        $response1 = $client->getUsers(['id' => 1]);
+        $response1 = $client->getUsers(1);
         $response2 = $client->getUserById(1);
         self::assertEquals($response1[0], $response2);
     }

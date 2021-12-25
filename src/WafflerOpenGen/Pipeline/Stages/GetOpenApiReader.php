@@ -26,7 +26,7 @@ class GetOpenApiReader implements StageInterface
     /**
      * @param non-empty-string $value
      *
-     * @return mixed
+     * @return \cebe\openapi\SpecObjectInterface
      * @throws \cebe\openapi\exceptions\IOException
      * @throws \cebe\openapi\exceptions\TypeErrorException
      * @throws \cebe\openapi\exceptions\UnresolvableReferenceException
