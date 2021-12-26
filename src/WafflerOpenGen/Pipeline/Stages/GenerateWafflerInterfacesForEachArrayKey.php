@@ -131,12 +131,15 @@ EOL;
         $phpNamespace->addUse($verbAttribute);
         $method->addAttribute($verbAttribute, [$url]);
 
+        $this->addAuthorizationParameters($pathOperation, $phpNamespace, $method);
+
         foreach ($pathOperation->parameters as $parameter) {
+            $parameter = $parameter instanceof Reference ? $parameter->resolve() : $parameter;
             $this->addParameter(
                 $phpNamespace,
                 $method,
                 //@phpstan-ignore-next-line
-                $parameter instanceof Reference ? $parameter->resolve() : $parameter,
+                $parameter,
             );
         }
 
@@ -158,15 +161,22 @@ EOL;
         Method $method,
         Parameter $parameter
     ): void {
-        $phpParameter = $method->addParameter($parameter->name);
-        if (!$parameter->required) {
-            $phpParameter->setNullable();
-            $phpParameter->setDefaultValue(null);
+        $parameterName = $this->toFunctionName($parameter->name);
+        if (array_key_exists($parameterName, $method->getParameters())) {
+            return;
         }
+        $phpParameter = $method->addParameter($parameterName);
+
         try {
             $parameterType = $parameter->type;
         } catch (Exception) {
             $parameterType = $parameter->schema->type ?? null;
+        }
+
+        $allowsNullForType = $this->allowsNullForType($parameterType);
+
+        if (!$parameter->required && $allowsNullForType) {
+            $phpParameter->setNullable();
         }
 
         switch ($parameter->in) {
@@ -219,8 +229,10 @@ EOL;
                 throw new Exception("Unknown parameter position \"$parameter->in\"");
             }
         }
-        $notRequiredParamType = !$parameter->required ? 'null|' : '';
-        $method->addComment("@param $notRequiredParamType$parameterType \$$parameter->name $parameter->description");
+        $notRequiredParamType = !$parameter->required && $allowsNullForType
+            ? 'null|'
+            : '';
+        $method->addComment("@param $notRequiredParamType$parameterType \$$parameterName $parameter->description");
     }
 
     private function convertTagToInterfaceName(string $tag): string
@@ -242,11 +254,56 @@ EOL;
 
     private function getParameterType(?string $type): string
     {
-        return match ($type) {
-            'integer' => 'int',
-            'object' => 'array',
-            'null',null => 'null|string',
+        return (string) match (is_string($type) ? strtolower($type) : $type) {
+            'integer', 'int', 'number', 'numeric' => 'int',
+            'object', 'json', 'array' => 'array',
+            'null', null, '' => 'null|string',
+            'apikey', 'basic' => 'string',
             default => $type
         };
+    }
+
+    /**
+     * @param \cebe\openapi\spec\Operation     $pathOperation
+     * @param \Nette\PhpGenerator\PhpNamespace $phpNamespace
+     * @param \Nette\PhpGenerator\Method       $method
+     *
+     * @return void
+     * @throws \cebe\openapi\exceptions\TypeErrorException
+     * @throws \Exception
+     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
+     */
+    private function addAuthorizationParameters(
+        Operation $pathOperation,
+        PhpNamespace $phpNamespace,
+        Method $method
+    ): void {
+        foreach ($pathOperation->security ?? [] as $securityRequirement) {
+            $securityRequirementList = json_decode(json_encode($securityRequirement->getSerializableData()), true);
+
+            foreach ($securityRequirement->getBaseDocument()->securityDefinitions as $securityDefinitionName => $securityDefinition) {
+                if (in_array(
+                    $securityDefinition['type'],
+                    ['oauth', 'oauth2'],
+                    true
+                ) || !isset($securityRequirementList[$securityDefinitionName])) {
+                    continue;
+                }
+                $this->addParameter(
+                    $phpNamespace,
+                    $method,
+                    new Parameter($securityDefinition)
+                );
+            }
+        }
+    }
+
+    private function allowsNullForType(?string $typeName): bool
+    {
+        if (in_array($typeName, ['apiKey', 'basic', 'oauth2', 'oauth'], true)) {
+            return false;
+        }
+
+        return true;
     }
 }
