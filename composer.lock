@@ -1188,16 +1188,16 @@
         },
         {
             "name": "waffler/waffler",
-            "version": "0.5.1",
+            "version": "0.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/waffler-io/waffler.git",
-                "reference": "e38133fbbfeb5ab1aa4e21949ff3b1452d45be55"
+                "reference": "63f60bc2dd065946c3d955cbf05d2f75ad1b9dac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/waffler-io/waffler/zipball/e38133fbbfeb5ab1aa4e21949ff3b1452d45be55",
-                "reference": "e38133fbbfeb5ab1aa4e21949ff3b1452d45be55",
+                "url": "https://api.github.com/repos/waffler-io/waffler/zipball/63f60bc2dd065946c3d955cbf05d2f75ad1b9dac",
+                "reference": "63f60bc2dd065946c3d955cbf05d2f75ad1b9dac",
                 "shasum": ""
             },
             "require": {
@@ -1207,8 +1207,8 @@
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.4",
                 "jetbrains/phpstorm-attributes": "dev-master",
-                "mockery/mockery": "1.4.x-dev",
-                "phpstan/phpstan": "1.2.x-dev",
+                "mockery/mockery": "^1.4",
+                "phpstan/phpstan": "^1.2",
                 "phpunit/phpunit": "^9.5.10"
             },
             "type": "library",
@@ -1233,9 +1233,9 @@
             "description": "Make REST clients easy.",
             "support": {
                 "issues": "https://github.com/waffler-io/waffler/issues",
-                "source": "https://github.com/waffler-io/waffler/tree/0.5.1"
+                "source": "https://github.com/waffler-io/waffler/tree/0.5.2"
             },
-            "time": "2021-12-23T17:16:32+00:00"
+            "time": "2021-12-26T21:30:15+00:00"
         }
     ],
     "packages-dev": [
@@ -2821,16 +2821,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.5.10",
+            "version": "9.5.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "c814a05837f2edb0d1471d6e3f4ab3501ca3899a"
+                "reference": "2406855036db1102126125537adb1406f7242fdd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c814a05837f2edb0d1471d6e3f4ab3501ca3899a",
-                "reference": "c814a05837f2edb0d1471d6e3f4ab3501ca3899a",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/2406855036db1102126125537adb1406f7242fdd",
+                "reference": "2406855036db1102126125537adb1406f7242fdd",
                 "shasum": ""
             },
             "require": {
@@ -2908,11 +2908,11 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.10"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.11"
             },
             "funding": [
                 {
-                    "url": "https://phpunit.de/donate.html",
+                    "url": "https://phpunit.de/sponsors.html",
                     "type": "custom"
                 },
                 {
@@ -2920,7 +2920,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-09-25T07:38:51+00:00"
+            "time": "2021-12-25T07:07:57+00:00"
         },
         {
             "name": "psr/cache",
