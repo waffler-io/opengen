@@ -16,6 +16,9 @@ use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\PathItem;
 use cebe\openapi\spec\Reference;
 use Exception;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\ServerException;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpFile;
@@ -149,8 +152,11 @@ EOL;
         } else {
             $phpNamespace->addUse(ResponseInterface::class);
             $method->setReturnType(ResponseInterface::class);
-            $method->addComment("\n@return ".ResponseInterface::class);
+            $method->addComment("\n@return \\".ResponseInterface::class);
         }
+        $method->addComment('@throws \\'.ClientException::class);
+        $method->addComment('@throws \\'.ServerException::class);
+        $method->addComment('@throws \\'.ConnectException::class);
     }
 
     /**
@@ -246,7 +252,7 @@ EOL;
 
         $newPieces = [];
         foreach ($pieces as $piece) {
-            $newPieces[] = str_replace([',', ';', '#', '@', '$', '/', '\\'], '', ucfirst(strtolower($piece)));
+            $newPieces[] = str_replace([',', ';', '#', '@', '$', '/', '\\'], '', ucfirst($piece));
         }
 
         return lcfirst(implode('', $newPieces));
