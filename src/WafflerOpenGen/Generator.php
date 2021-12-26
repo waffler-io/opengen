@@ -26,10 +26,12 @@ class Generator implements GeneratorInterface
 {
     /**
      * @inheritDoc
+     *
+     * @return array<class-string>
      */
-    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classesNamespace): void
+    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classesNamespace): array
     {
-        (new Pipeline())
+        return (new Pipeline())
             ->run($openApiFilePath)
             ->through([
                 new GetOpenApiReader(),

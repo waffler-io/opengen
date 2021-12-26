@@ -29,10 +29,10 @@ class OutputClassToDirectory implements StageInterface
     /**
      * @param array<non-empty-string, non-empty-string> $value
      *
-     * @return mixed
+     * @return array<class-string>
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */
-    public function handle(mixed $value): bool
+    public function handle(mixed $value): array
     {
         $filesystem = new Filesystem();
 
@@ -49,6 +49,7 @@ class OutputClassToDirectory implements StageInterface
             $filesystem->appendToFile($fileName, $classFile);
         }
 
-        return true;
+        // @phpstan-ignore-next-line
+        return array_keys($value);
     }
 }

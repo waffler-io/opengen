@@ -25,8 +25,8 @@ interface GeneratorInterface
      * @param non-empty-string $outputDir
      * @param non-empty-string $classesNamespace
      *
-     * @return void
+     * @return array<class-string> The generated interfaces. (Fully qualified names)
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */
-    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classesNamespace): void;
+    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classesNamespace): array;
 }
