@@ -154,9 +154,9 @@ EOL;
             $method->setReturnType(ResponseInterface::class);
             $method->addComment("\n@return \\".ResponseInterface::class);
         }
-        $method->addComment('@throws \\'.ClientException::class);
-        $method->addComment('@throws \\'.ServerException::class);
-        $method->addComment('@throws \\'.ConnectException::class);
+        $method->addComment('@throws \\'.ClientException::class . ' Exception when a client error is encountered (4xx codes).');
+        $method->addComment('@throws \\'.ServerException::class . ' Exception when a server error is encountered (5xx codes).');
+        $method->addComment('@throws \\'.ConnectException::class . ' Exception thrown when a connection cannot be established.');
     }
 
     /**
