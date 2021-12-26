@@ -157,6 +157,10 @@ EOL;
         $method->addComment('@throws \\'.ClientException::class . ' Exception when a client error is encountered (4xx codes).');
         $method->addComment('@throws \\'.ServerException::class . ' Exception when a server error is encountered (5xx codes).');
         $method->addComment('@throws \\'.ConnectException::class . ' Exception thrown when a connection cannot be established.');
+
+        if ($pathOperation->deprecated) {
+            $method->addComment("@deprecated This method is deprecated and will be removed soon.");
+        }
     }
 
     /**
