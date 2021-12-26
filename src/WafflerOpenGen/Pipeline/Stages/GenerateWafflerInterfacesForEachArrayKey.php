@@ -246,7 +246,7 @@ EOL;
 
         $newPieces = [];
         foreach ($pieces as $piece) {
-            $newPieces[] = str_replace([',', ';', '#', '@', '$', '/', '\\'], '', ucfirst($piece));
+            $newPieces[] = str_replace([',', ';', '#', '@', '$', '/', '\\'], '', ucfirst(strtolower($piece)));
         }
 
         return lcfirst(implode('', $newPieces));
