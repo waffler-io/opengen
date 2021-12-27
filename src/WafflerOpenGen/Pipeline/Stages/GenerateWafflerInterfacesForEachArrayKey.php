@@ -84,7 +84,9 @@ EOL;
 
             $interfaceName = $this->convertTagToInterfaceName($tag->name);
             $class = $phpNamespace->addInterface($interfaceName);
-            $class->addComment($tag->description);
+            if ($tag->description) {
+                $class->addComment($tag->description);
+            }
             if ($tag->externalDocs) {
                 $class->addComment("@see {$tag->externalDocs->url} {$tag->externalDocs->description}");
             }
