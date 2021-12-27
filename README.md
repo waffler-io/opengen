@@ -7,6 +7,24 @@ waffler interfaces.
 ```shell
 composer require waffler/opengen
 ```
+** This package requires PHP 8 or above. **
 
 ## How to use
+```php
+<?php
+
+require __DIR__.'/vendor/autoload.php';
+
+use Waffler\OpenGen\Generator;
+
+$generator = new Generator();
+
+$generationMap = $generator->fromOpenApiFile(
+    'path/to/openapi-file.yaml',
+    'path/to/output-dir/',
+    'Desired\\Namespace',
+    // Generation options.
+);
+```
+
 Work in progress.
