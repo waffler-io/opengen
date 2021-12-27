@@ -141,12 +141,13 @@ EOL;
             $this->addParameter(
                 $phpNamespace,
                 $method,
+                $pathOperation,
                 //@phpstan-ignore-next-line
                 $parameter,
             );
         }
 
-        if (in_array('application/json', $pathOperation->getSerializableData()?->produces ?? [], true)) {
+        if ($this->hasJsonInMimeTypes($pathOperation->getSerializableData()?->produces ?? [])) {
             $method->setReturnType('array');
             $method->addComment("\n@return array");
         } else {
@@ -169,6 +170,7 @@ EOL;
     private function addParameter(
         PhpNamespace $phpNamespace,
         Method $method,
+        Operation $pathOperation,
         Parameter $parameter
     ): void {
         $parameterName = $this->toFunctionName($parameter->name);
@@ -192,7 +194,7 @@ EOL;
         switch ($parameter->in) {
             case 'body':
             {
-                if (in_array($parameterType, ['array', 'object'], true)) {
+                if ($this->bodyMustBeJsonType($parameterType, $pathOperation)) {
                     $phpNamespace->addUse(Json::class);
                     $phpParameter->addAttribute(Json::class);
                     $phpParameter->setType('array');
@@ -302,6 +304,7 @@ EOL;
                 $this->addParameter(
                     $phpNamespace,
                     $method,
+                    $pathOperation,
                     new Parameter($securityDefinition)
                 );
             }
@@ -315,5 +318,35 @@ EOL;
         }
 
         return true;
+    }
+
+    /**
+     * @param mixed                        $parameterType
+     * @param \cebe\openapi\spec\Operation $pathOperation
+     *
+     * @return bool
+     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
+     */
+    private function bodyMustBeJsonType(mixed $parameterType, Operation $pathOperation): bool
+    {
+        return in_array($parameterType, ['array', 'object'], true)
+            || $this->hasJsonInMimeTypes($pathOperation->getSerializableData()?->consumes ?? []);
+    }
+
+    /**
+     * @param array<string> $mimes
+     *
+     * @return bool
+     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
+     */
+    private function hasJsonInMimeTypes(array $mimes): bool
+    {
+        foreach ($mimes as $mime) {
+            if (str_contains(strtolower($mime), 'json')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
