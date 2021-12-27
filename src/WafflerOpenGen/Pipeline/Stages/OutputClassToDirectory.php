@@ -40,16 +40,19 @@ class OutputClassToDirectory implements StageInterface
             $filesystem->mkdir($this->outputDir, 0700);
         }
 
+        $classNameFileMap = [];
+
         foreach ($value as $className => $classFile) {
             $fileName = "$this->outputDir/$className.php";
             if ($filesystem->exists($fileName)) {
                 $filesystem->remove($fileName);
             }
+            $classNameFileMap[$className] = $fileName;
             $filesystem->touch($fileName);
             $filesystem->appendToFile($fileName, $classFile);
         }
 
         // @phpstan-ignore-next-line
-        return array_keys($value);
+        return $classNameFileMap;
     }
 }

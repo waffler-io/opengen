@@ -26,16 +26,20 @@ class Generator implements GeneratorInterface
 {
     /**
      * @inheritDoc
-     *
-     * @return array<class-string>
+     * @param array<string, mixed> $options
+     * @return array<string, string>
      */
-    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classesNamespace): array
-    {
+    public function fromOpenApiFile(
+        string $openApiFilePath,
+        string $outputDir,
+        string $classesNamespace,
+        array $options = []
+    ): array {
         return (new Pipeline())
             ->run($openApiFilePath)
             ->through([
                 new GetOpenApiReader(),
-                new GenerateWafflerInterfacesForEachArrayKey($classesNamespace),
+                new GenerateWafflerInterfacesForEachArrayKey($classesNamespace, $options),
                 new OutputClassToDirectory($outputDir)
             ])
             ->thenReturn();

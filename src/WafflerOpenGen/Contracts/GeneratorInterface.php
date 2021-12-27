@@ -21,12 +21,18 @@ interface GeneratorInterface
     /**
      * Generates waffler interfaces from open-api files.
      *
-     * @param non-empty-string $openApiFilePath
-     * @param non-empty-string $outputDir
-     * @param non-empty-string $classesNamespace
+     * @param non-empty-string     $openApiFilePath
+     * @param non-empty-string     $outputDir
+     * @param non-empty-string     $classesNamespace
+     * @param array<string, mixed> $options
      *
-     * @return array<class-string> The generated interfaces. (Fully qualified names)
+     * @return array<string, string> InterfaceName => Output file.
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */
-    public function fromOpenApiFile(string $openApiFilePath, string $outputDir, string $classesNamespace): array;
+    public function fromOpenApiFile(
+        string $openApiFilePath,
+        string $outputDir,
+        string $classesNamespace,
+        array $options = []
+    ): array;
 }

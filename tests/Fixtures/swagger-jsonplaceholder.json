@@ -25,9 +25,15 @@
     "/users": {
       "get": {
         "operationId": "getUsers",
-        "tags": ["user"],
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "tags": [
+          "user"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "type": "integer",
@@ -52,9 +58,15 @@
     "/users/{id}": {
       "get": {
         "operationId": "getUserById",
-        "tags": ["user"],
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "tags": [
+          "user"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "description": "User id",
@@ -73,7 +85,50 @@
             "description": "Returns user by id"
           }
         }
+      },
+      "delete": {
+        "operationId": "deleteUserById",
+        "tags": [
+          "user"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "User id",
+            "type": "integer",
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/user"
+            },
+            "description": "Returns user by id"
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ]
       }
+    }
+  },
+  "securityDefinitions": {
+    "auth": {
+      "name": "Authorization",
+      "in": "header",
+      "type": "apiKey",
+      "description": "Authorization token"
     }
   },
   "definitions": {

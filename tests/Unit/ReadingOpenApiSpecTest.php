@@ -68,7 +68,14 @@ class ReadingOpenApiSpecTest extends TestCase
         $generator->fromOpenApiFile(
             __DIR__ . '/../Fixtures/swagger-jsonplaceholder.json',
             self::JSONPLACEHOLDER_OUTPUT_DIR,
-            'Waffler\\OpenGen\\Tests\\Fixtures\\JsonPlaceholder'
+            'Waffler\\OpenGen\\Tests\\Fixtures\\JsonPlaceholder',
+            [
+                'ignore' => [
+                    'parameters' => [
+                        'header' => ['Authorization']
+                    ]
+                ],
+            ]
         );
 
         $this->assertDirectoryExists(self::JSONPLACEHOLDER_OUTPUT_DIR);
@@ -81,8 +88,5 @@ class ReadingOpenApiSpecTest extends TestCase
             JsonPlaceholderUser::class,
             $client
         );
-        $response1 = $client->getUsers(1);
-        $response2 = $client->getUserById(1);
-        self::assertEquals($response1[0], $response2);
     }
 }
