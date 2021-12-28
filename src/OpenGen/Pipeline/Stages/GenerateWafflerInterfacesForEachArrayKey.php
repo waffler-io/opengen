@@ -125,6 +125,10 @@ EOL;
         PathItem $pathItem,
         Operation $pathOperation
     ): void {
+        if (! $pathOperation->operationId) {
+            throw new Exception("Could not generate method for [$verbName] $url. Reason: Missing operationId.");
+        }
+
         $method = $class->addMethod($this->toFunctionName($pathOperation->operationId));
         $method->addComment(($pathOperation->description ?: 'No description available.')."\n");
         $method->setPublic();
@@ -281,10 +285,11 @@ EOL;
     private function getParameterType(?string $type): string
     {
         return (string) match (is_string($type) ? strtolower($type) : $type) {
-            'integer', 'int', 'number', 'numeric' => 'int',
+            'integer', 'number', 'numeric' => 'int',
             'object', 'json', 'array' => 'array',
             'null', null, '' => 'null|string',
             'apikey', 'basic' => 'string',
+            'boolean' => 'bool',
             default => $type
         };
     }
