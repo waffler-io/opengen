@@ -39,7 +39,7 @@ class GetOpenApiReader implements StageInterface
 
         return match ($fileInfo->getExtension()) {
             'json' => Reader::readFromJsonFile($value),
-            'yaml' => Reader::readFromYamlFile($value),
+            'yaml', 'yml' => Reader::readFromYamlFile($value),
             default => throw new InvalidArgumentException("File extension '{$fileInfo->getExtension()}' is not valid for OpenAPI format.")
         };
     }
