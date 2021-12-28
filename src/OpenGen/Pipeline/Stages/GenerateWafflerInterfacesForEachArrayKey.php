@@ -133,7 +133,7 @@ EOL;
             throw new Exception("Could not generate method for [$verbName] $url. Reason: Missing operationId.");
         }
 
-        $method = $class->addMethod($this->toFunctionName($pathOperation->operationId));
+        $method = $class->addMethod($this->toFunctionName($this->removePathOperationIdPrefix($pathOperation->operationId)));
         $method->addComment(($pathOperation->description ?: 'No description available.')."\n");
         $method->setPublic();
         if ($pathItem->description) {
@@ -162,6 +162,21 @@ EOL;
                 $pathOperation,
                 //@phpstan-ignore-next-line
                 $parameter,
+            );
+        }
+
+        if ($pathOperation->requestBody?->content['application/json'] ?? false) {
+            $this->addParameter(
+                $phpNamespace,
+                $method,
+                $pathOperation,
+                new Parameter([
+                    'name' => 'requestBody',
+                    'in' => 'body',
+                    'type' => 'object',
+                    'description' => $pathOperation->requestBody->description,
+                    'required' => $pathOperation->requestBody->required
+                ])
             );
         }
 
@@ -397,5 +412,23 @@ EOL;
         }
 
         return true;
+    }
+
+    private function removePathOperationIdPrefix(string $pathOperationId): string
+    {
+        $methodPrefixRegex = $this->options['remove_method_prefix'] ?? false;
+        if (! $methodPrefixRegex) {
+            return $pathOperationId;
+        }
+
+        if (
+            str_starts_with($methodPrefixRegex, '/')
+            && str_ends_with($methodPrefixRegex, '/')
+            && strlen($methodPrefixRegex) > 2
+        ) {
+            return (string)preg_replace($methodPrefixRegex, '', $pathOperationId);
+        }
+
+        return str_replace($methodPrefixRegex, '', $pathOperationId);
     }
 }

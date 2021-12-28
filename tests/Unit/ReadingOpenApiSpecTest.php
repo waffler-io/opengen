@@ -75,6 +75,7 @@ class ReadingOpenApiSpecTest extends TestCase
                         'header' => ['Authorization']
                     ]
                 ],
+                'remove_method_prefix' => '/\w*\//'
             ]
         );
 

@@ -24,7 +24,7 @@
   "paths": {
     "/users": {
       "get": {
-        "operationId": "getUsers",
+        "operationId": "user/all",
         "tags": [
           "user"
         ],
@@ -57,7 +57,7 @@
     },
     "/users/{id}": {
       "get": {
-        "operationId": "getUserById",
+        "operationId": "user/getById",
         "tags": [
           "user"
         ],
@@ -86,7 +86,7 @@
         }
       },
       "delete": {
-        "operationId": "deleteUserById",
+        "operationId": "user/deleteById",
         "tags": [
           "user"
         ],
@@ -115,7 +115,7 @@
         }
       },
       "patch": {
-        "operationId": "updateUser",
+        "operationId": "user/updateById",
         "description": "Update a user by its id",
         "tags": ["user"],
         "parameters": [
@@ -129,6 +129,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Ok",
