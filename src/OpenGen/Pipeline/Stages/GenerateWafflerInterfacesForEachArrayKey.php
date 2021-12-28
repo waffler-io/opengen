@@ -279,11 +279,11 @@ EOL;
 
     private function toFunctionName(string $name): string
     {
-        $pieces = explode(' ', str_replace(['-', '_'], ' ', $name));
+        $pieces = explode(' ', str_replace(['-', '_', '/', '\\'], ' ', $name));
 
         $newPieces = [];
         foreach ($pieces as $piece) {
-            $newPieces[] = str_replace([',', ';', '#', '@', '$', '/', '\\'], '', ucfirst($piece));
+            $newPieces[] = str_replace([',', ';', '#', '@', '$'], '', ucfirst($piece));
         }
 
         return lcfirst(implode('', $newPieces));
