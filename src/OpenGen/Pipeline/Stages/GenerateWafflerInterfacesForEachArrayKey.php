@@ -27,6 +27,7 @@ use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
 use Psr\Http\Message\ResponseInterface;
 use Waffler\Attributes\Request\Body;
+use Waffler\Attributes\Request\Consumes;
 use Waffler\Attributes\Request\FormParam;
 use Waffler\Attributes\Request\HeaderParam;
 use Waffler\Attributes\Request\Json;
@@ -184,6 +185,10 @@ EOL;
 
         if ($pathOperation->deprecated) {
             $method->addComment("@deprecated This method is deprecated and will be removed soon.");
+        }
+
+        if ($pathOperation->externalDocs) {
+            $method->addComment("@see {$pathOperation->externalDocs->url} {$pathOperation->externalDocs->description}");
         }
     }
 
@@ -444,6 +449,8 @@ EOL;
                 'description' => $pathOperation->requestBody->description, //@phpstan-ignore-line
                 'required' => $pathOperation->requestBody->required //@phpstan-ignore-line
             ]);
+            $phpNamespace->addUse(Consumes::class);
+            $method->addAttribute(Consumes::class, ['application/json']);
         } else {
             $parameter = new Parameter([
                 'name' => 'requestBody',
@@ -452,6 +459,10 @@ EOL;
                 'description' => $pathOperation->requestBody->description, //@phpstan-ignore-line
                 'required' => $pathOperation->requestBody->required //@phpstan-ignore-line
             ]);
+            if (isset($requestBody->content)) {
+                $phpNamespace->addUse(Consumes::class);
+                $method->addAttribute(Consumes::class, [array_key_first($requestBody->content)]);
+            }
         }
 
         $this->addParameter(

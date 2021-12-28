@@ -129,6 +129,10 @@
             }
           }
         ],
+        "externalDocs": {
+          "url": "https://www.google.com.br/",
+          "description": "Search on google."
+        },
         "requestBody": {
           "content": {
             "application/json": {
