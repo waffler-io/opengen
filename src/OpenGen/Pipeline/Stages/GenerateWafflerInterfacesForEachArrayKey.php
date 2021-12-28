@@ -93,6 +93,10 @@ EOL;
 
             foreach ($value->paths as $url => $pathItem) {
                 foreach ($pathItem->getOperations() as $verbName => $pathOperation) {
+                    if (!isset($pathOperation->tags[0])) {
+                        throw new Exception("Path operation with no tags are not allowed.");
+                    }
+
                     if ($pathOperation->tags[0] !== $tag->name) {
                         continue;
                     }
@@ -161,7 +165,10 @@ EOL;
             );
         }
 
-        if ($this->hasJsonInMimeTypes($pathOperation->getSerializableData()?->produces ?? [])) {
+        // @phpstan-ignore-next-line
+        $returns200Json = isset($pathOperation->responses['200']->content['application/json']);
+
+        if ($returns200Json || $this->hasJsonInMimeTypes($pathOperation->getSerializableData()?->produces ?? [])) {
             $method->setReturnType('array');
             $method->addComment("\n@return array");
         } else {
@@ -198,9 +205,9 @@ EOL;
         $phpParameter = $method->addParameter($parameterName);
 
         try {
-            $parameterType = $parameter->type;
+            $parameterType = $parameter->schema?->type ?? $parameter->type ?? null;
         } catch (Exception) {
-            $parameterType = $parameter->schema->type ?? null;
+            $parameterType = null;
         }
 
         $allowsNullForType = $this->allowsNullForType($parameterType);
@@ -311,7 +318,9 @@ EOL;
         foreach ($pathOperation->security ?? [] as $securityRequirement) {
             $securityRequirementList = json_decode(json_encode($securityRequirement->getSerializableData()), true);
 
-            foreach ($securityRequirement->getBaseDocument()->securityDefinitions as $securityDefinitionName => $securityDefinition) {
+            /** @var \cebe\openapi\spec\OpenApi $baseDocument */
+            $baseDocument = $securityRequirement->getBaseDocument();
+            foreach ($baseDocument->securityDefinitions ?? [] as $securityDefinitionName => $securityDefinition) {
                 if (in_array(
                     $securityDefinition['type'],
                     ['oauth', 'oauth2'],
