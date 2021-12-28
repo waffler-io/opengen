@@ -165,20 +165,7 @@ EOL;
             );
         }
 
-        if ($pathOperation->requestBody?->content['application/json'] ?? false) {
-            $this->addParameter(
-                $phpNamespace,
-                $method,
-                $pathOperation,
-                new Parameter([
-                    'name' => 'requestBody',
-                    'in' => 'body',
-                    'type' => 'object',
-                    'description' => $pathOperation->requestBody->description,
-                    'required' => $pathOperation->requestBody->required
-                ])
-            );
-        }
+        $this->addRequestBodyParameter($pathOperation, $phpNamespace, $method);
 
         // @phpstan-ignore-next-line
         $returns200Json = isset($pathOperation->responses['200']->content['application/json']);
@@ -430,5 +417,48 @@ EOL;
         }
 
         return str_replace($methodPrefixRegex, '', $pathOperationId);
+    }
+
+    /**
+     * @param \cebe\openapi\spec\Operation     $pathOperation
+     * @param \Nette\PhpGenerator\PhpNamespace $phpNamespace
+     * @param \Nette\PhpGenerator\Method       $method
+     *
+     * @return void
+     * @throws \cebe\openapi\exceptions\TypeErrorException
+     * @throws \Exception
+     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
+     */
+    private function addRequestBodyParameter(Operation $pathOperation, PhpNamespace $phpNamespace, Method $method): void
+    {
+        if (!$requestBody = $pathOperation->requestBody) {
+            return;
+        }
+
+        //@phpstan-ignore-next-line
+        if ($requestBody?->content['application/json'] ?? false) {
+            $parameter = new Parameter([
+                'name' => 'requestBody',
+                'in' => 'body',
+                'type' => 'object',
+                'description' => $pathOperation->requestBody->description, //@phpstan-ignore-line
+                'required' => $pathOperation->requestBody->required //@phpstan-ignore-line
+            ]);
+        } else {
+            $parameter = new Parameter([
+                'name' => 'requestBody',
+                'in' => 'body',
+                'type' => 'string',
+                'description' => $pathOperation->requestBody->description, //@phpstan-ignore-line
+                'required' => $pathOperation->requestBody->required //@phpstan-ignore-line
+            ]);
+        }
+
+        $this->addParameter(
+            $phpNamespace,
+            $method,
+            $pathOperation,
+            $parameter
+        );
     }
 }
