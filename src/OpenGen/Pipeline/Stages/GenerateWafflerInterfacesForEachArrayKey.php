@@ -250,7 +250,7 @@ EOL;
             {
                 $phpNamespace->addUse(FormParam::class);
                 $phpParameter->addAttribute(FormParam::class, [$parameter->name]);
-                $phpParameter->setType('string');
+                $phpParameter->setType($parameterType = $this->getParameterType($parameterType));
                 $parameterType = 'string';
                 break;
             }
@@ -287,8 +287,7 @@ EOL;
         return (string) match (is_string($type) ? strtolower($type) : $type) {
             'integer', 'number', 'numeric' => 'int',
             'object', 'json', 'array' => 'array',
-            'null', null, '' => 'null|string',
-            'apikey', 'basic' => 'string',
+            'apikey', 'basic', 'file', null => 'string',
             'boolean' => 'bool',
             default => $type
         };
