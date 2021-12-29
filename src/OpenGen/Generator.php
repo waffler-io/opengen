@@ -13,6 +13,7 @@ namespace Waffler\OpenGen;
 
 use Waffler\OpenGen\Contracts\GeneratorInterface;
 use Waffler\OpenGen\Pipeline\Stages\GenerateWafflerInterfacesForEachArrayKey;
+use Waffler\OpenGen\Pipeline\Stages\GetInterfaceBuilderForFile;
 use Waffler\OpenGen\Pipeline\Stages\GetOpenApiReader;
 use Waffler\OpenGen\Pipeline\Stages\OutputClassToDirectory;
 use Waffler\Pipeline\Pipeline;
@@ -35,12 +36,12 @@ class Generator implements GeneratorInterface
         string $classesNamespace,
         array $options = []
     ): array {
+        $options['namespace'] = $classesNamespace;
         return (new Pipeline())
             ->run($openApiFilePath)
             ->through([
                 new GetOpenApiReader(),
-                new GenerateWafflerInterfacesForEachArrayKey($classesNamespace, $options),
-                new OutputClassToDirectory($outputDir)
+                new OutputClassToDirectory($outputDir, $options)
             ])
             ->thenReturn();
     }

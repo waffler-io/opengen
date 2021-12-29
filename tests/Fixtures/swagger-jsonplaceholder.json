@@ -129,6 +129,7 @@
             }
           }
         ],
+        "security": [{"bearer": []}],
         "externalDocs": {
           "url": "https://www.google.com.br/",
           "description": "Search on google."
@@ -137,7 +138,8 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "type": "object",
+                "required": true
               }
             }
           }
@@ -154,6 +156,17 @@
             }
           }
         }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "apiKey",
+        "scheme": "bearer",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Authorization token"
       }
     }
   }

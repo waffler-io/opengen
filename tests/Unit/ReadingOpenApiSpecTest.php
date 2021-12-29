@@ -35,7 +35,7 @@ class ReadingOpenApiSpecTest extends TestCase
         $generator = new Generator();
 
         $generator->fromOpenApiFile(
-            __DIR__ . '/../Fixtures/swagger-petshop.json',
+            __DIR__.'/../Fixtures/swagger-petshop.json',
             self::PETSHOP_OUTPUT_DIR,
             'Waffler\\OpenGen\\Tests\\Fixtures\\SwaggerPetshop'
         );
@@ -66,7 +66,7 @@ class ReadingOpenApiSpecTest extends TestCase
         $generator = new Generator();
 
         $generator->fromOpenApiFile(
-            __DIR__ . '/../Fixtures/swagger-jsonplaceholder.json',
+            __DIR__.'/../Fixtures/swagger-jsonplaceholder.json',
             self::JSONPLACEHOLDER_OUTPUT_DIR,
             'Waffler\\OpenGen\\Tests\\Fixtures\\JsonPlaceholder',
             [
@@ -89,5 +89,21 @@ class ReadingOpenApiSpecTest extends TestCase
             JsonPlaceholderUser::class,
             $client
         );
+    }
+
+    public function testItMustGenerateGithubApiSpec(): void
+    {
+        $generator = new Generator();
+
+        $generator->fromOpenApiFile(
+            __DIR__.'/../Fixtures/api.github.com.json',
+            __DIR__.'/../Fixtures/GitHub',
+            'Waffler\\OpenGen\\Tests\\Fixtures\\GitHub',
+            [
+                'remove_method_prefix' => '/\w*\//'
+            ]
+        );
+
+        $this->expectNotToPerformAssertions();
     }
 }

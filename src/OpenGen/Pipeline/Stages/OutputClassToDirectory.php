@@ -11,7 +11,12 @@
 
 namespace Waffler\OpenGen\Pipeline\Stages;
 
+use cebe\openapi\spec\OpenApi;
+use Nette\PhpGenerator\PsrPrinter;
 use Symfony\Component\Filesystem\Filesystem;
+use Waffler\OpenGen\Contracts\InterfaceBuilder;
+use Waffler\OpenGen\SpecificationTypes\OpenApi\V3\InterfaceBuilder as OpenApiV3;
+use Waffler\OpenGen\SpecificationTypes\Swagger\V2\InterfaceBuilder as SwaggerV2;
 use Waffler\Pipeline\Contracts\StageInterface;
 
 /**
@@ -23,17 +28,19 @@ class OutputClassToDirectory implements StageInterface
 {
     public function __construct(
         private string $outputDir,
+        private array $options
     ) {
     }
 
     /**
-     * @param array<non-empty-string, non-empty-string> $value
+     * @param array<non-empty-string, \Nette\PhpGenerator\PhpFile> $value
      *
      * @return array<class-string>
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */
     public function handle(mixed $value): array
     {
+        $classMap = $this->getInterfaceBuilder($value)->buildInterface($value);
         $filesystem = new Filesystem();
 
         if (!$filesystem->exists($this->outputDir)) {
@@ -41,8 +48,10 @@ class OutputClassToDirectory implements StageInterface
         }
 
         $classNameFileMap = [];
+        $psrPrinter = new PsrPrinter();
 
-        foreach ($value as $className => $classFile) {
+        foreach ($classMap as $className => $phpFile) {
+            $classFile = $psrPrinter->printFile($phpFile);
             $fileName = "$this->outputDir/$className.php";
             if ($filesystem->exists($fileName)) {
                 $filesystem->remove($fileName);
@@ -54,5 +63,16 @@ class OutputClassToDirectory implements StageInterface
 
         // @phpstan-ignore-next-line
         return $classNameFileMap;
+    }
+
+    private function getInterfaceBuilder(OpenApi $api): InterfaceBuilder
+    {
+        if (!is_null($api->openapi)) {
+            return new OpenApiV3($this->options);
+        } elseif (!is_null($api->swagger)) {
+            return new SwaggerV2($this->options);
+        }
+
+        throw new Exception("Unknown specification file type.");
     }
 }
