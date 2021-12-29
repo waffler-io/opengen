@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Waffler.
+ *
+ * (c) Erick Johnson Almeida de Menezes <erickmenezes.dev@gmail.com>
+ *
+ * This source file is subject to the MIT licence that is bundled
+ * with this source code in the file LICENCE.
+ */
+
 namespace Waffler\OpenGen\SpecificationTypes\Swagger\V2;
 
 use cebe\openapi\spec\Components;
@@ -7,11 +16,14 @@ use cebe\openapi\spec\MediaType;
 use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\RequestBody;
+use cebe\openapi\spec\Response;
+use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\SecurityScheme;
 use cebe\openapi\spec\Tag;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpFile;
+use Psr\Http\Message\ResponseInterface;
 use Waffler\OpenGen\SpecificationTypes\OpenApi\V3\InterfaceBuilder as OpenApiInterfaceBuilder;
 
 class InterfaceBuilder extends OpenApiInterfaceBuilder
@@ -25,6 +37,7 @@ class InterfaceBuilder extends OpenApiInterfaceBuilder
         $this->normalizeSecurityDefinitionsToOpenApiV3($specification);
         $this->normalizeBodyParamsToRequestBody($specification);
         $this->normalizeParametersToOpenApiSpec($specification);
+        $this->normalizeReturnValue($specification);
 
         return parent::createPhpFile(
             $specification,
@@ -96,7 +109,7 @@ class InterfaceBuilder extends OpenApiInterfaceBuilder
                         'required' => $parameter->required,
                     ];
 
-                    if (empty($mediaTypes) && in_array($parameter->schema->type, ['array', 'object'])) {
+                    if (empty($mediaTypes) && in_array($parameter->schema->type, ['array', 'object'], true)) {
                         $mediaTypes[] = 'application/json';
                     }
 
@@ -143,6 +156,36 @@ class InterfaceBuilder extends OpenApiInterfaceBuilder
                     ]);
                 }
                 $operation->parameters = $newParameters;
+            }
+        }
+    }
+
+    /**
+     * @throws \cebe\openapi\exceptions\TypeErrorException
+     */
+    private function normalizeReturnValue(OpenApi $specification): void
+    {
+        foreach ($specification->paths as $path) {
+            foreach ($path->getOperations() as $operation) {
+                $newResponses = [];
+                $produces = $operation->getSerializableData()->produces ?? [];
+
+                foreach ($operation->responses as $statusCode => $response) {
+                    $content = [];
+                    foreach ($produces as $mimeType) {
+                        $content[$mimeType] = new MediaType([
+                            'schema' => new Schema([
+                                'type' => $response->schema->type ?? $response->type ?? null
+                            ])
+                        ]);
+                    }
+                    $newResponses[$statusCode] = new Response([
+                        'description' => $response->description,
+                        'content' => $content
+                    ]);
+                }
+
+                $operation->responses = new Responses($newResponses);
             }
         }
     }

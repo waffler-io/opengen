@@ -90,20 +90,4 @@ class ReadingOpenApiSpecTest extends TestCase
             $client
         );
     }
-
-    public function testItMustGenerateGithubApiSpec(): void
-    {
-        $generator = new Generator();
-
-        $generator->fromOpenApiFile(
-            __DIR__.'/../Fixtures/api.github.com.json',
-            __DIR__.'/../Fixtures/GitHub',
-            'Waffler\\OpenGen\\Tests\\Fixtures\\GitHub',
-            [
-                'remove_method_prefix' => '/\w*\//'
-            ]
-        );
-
-        $this->expectNotToPerformAssertions();
-    }
 }

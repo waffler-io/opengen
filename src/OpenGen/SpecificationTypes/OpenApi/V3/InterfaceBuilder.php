@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Waffler.
+ *
+ * (c) Erick Johnson Almeida de Menezes <erickmenezes.dev@gmail.com>
+ *
+ * This source file is subject to the MIT licence that is bundled
+ * with this source code in the file LICENCE.
+ */
+
 namespace Waffler\OpenGen\SpecificationTypes\OpenApi\V3;
 
 use cebe\openapi\spec\OpenApi;
@@ -50,7 +59,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
     /**
      * @inheritDoc
      */
-    public function buildInterface(OpenApi $specification): array
+    public function buildInterfaces(OpenApi $specification): array
     {
         $classes = [];
 
@@ -205,33 +214,35 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
             $this->addUse(Body::class);
             $phpParameter->addAttribute(Body::class);
         }
-
     }
 
     protected function addReturnType(Method $method, Operation $pathOperation): void
     {
         foreach ($pathOperation->responses ?? [] as $statusCode => $response) {
-            $intStatusCode = (int)$statusCode;
+            $statusCode = (int)$statusCode;
 
-            if ($intStatusCode > 400) {
+            if ($statusCode >= 400) {
                 continue;
             }
 
-            $mediaTypes = array_keys($response->content);
-            $this->addUse(Produces::class);
-            $method->addAttribute(Produces::class, [$mediaTypes]);
-
-            if (in_array('application/json', $mediaTypes)) {
+            foreach ($response->content as $mimeType => $mediaType) {
+                if (
+                    !str_contains($mimeType, 'json')
+                    && !in_array(($mediaType->schema->type ?? null), ['array', 'object'], true) //@phpstan-ignore-line
+                ) {
+                    continue;
+                }
+                $this->addUse(Produces::class);
+                $method->addAttribute(Produces::class, [$mimeType]);
                 $method->setReturnType('array');
                 $method->addComment("@return array $response->description");
-            } else {
-                $this->addUse(ResponseInterface::class);
-                $method->setReturnType(ResponseInterface::class);
-                $method->addComment("@return \Psr\Http\Message\ResponseInterface $response->description");
+                return;
             }
-
-            return;
         }
+
+        $this->addUse(ResponseInterface::class);
+        $method->setReturnType(ResponseInterface::class);
+        $method->addComment("@return \Psr\Http\Message\ResponseInterface");
     }
 
     // helpers
@@ -251,7 +262,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         $operationKeys = array_keys($operation->requestBody?->content ?? []);
 
         foreach ($mediaTypes as $mediaType) {
-            if (in_array($mediaType, $operationKeys)) {
+            if (in_array($mediaType, $operationKeys, true)) {
                 return true;
             }
         }
@@ -357,8 +368,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
     protected function annotateParameter(
         Parameter $parameter,
         \Nette\PhpGenerator\Parameter $phpParameter,
-    ): void
-    {
+    ): void {
         switch ($parameter->in) {
             case 'query':
             {
@@ -437,25 +447,27 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
 
     /**
      * @throws \cebe\openapi\exceptions\TypeErrorException
+     * @throws \Exception
      */
     protected function addSecurityRequirementParameter(Method $method, OpenApi $openApi, string $securityName): void
     {
         $securityRequirement = $openApi->components->securitySchemes[$securityName]; //@phpstan-ignore-line
 
+        $secReqPlace = $securityRequirement->in ?? 'header'; //@phpstan-ignore-line
         $param = new Parameter([
             'name' => $securityRequirement->name, //@phpstan-ignore-line
             'schema' => new Schema([
-                'type' => 'mixed',
+                'type' => in_array($secReqPlace, ['header', 'query'], true) ? 'string' : 'mixed',
                 'required' => true
             ]),
-            'in' => $securityRequirement->in ?? 'header', //@phpstan-ignore-line
+            'in' => $secReqPlace,
             'description' => $securityRequirement->description ?? 'Authorization' //@phpstan-ignore-line
         ]);
 
         $phpParam = $this->addParameter($method, $param);
         if ($param->in === 'query') {
             $phpParam->addAttribute(QueryParam::class, [$param->name]);
-        } else if ($param->in === 'header') {
+        } elseif ($param->in === 'header') {
             $attribute = match ($securityRequirement->scheme) { //@phpstan-ignore-line
                 'bearer' => Bearer::class,
                 'basic' => Basic::class,
@@ -469,7 +481,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
                 $phpParam->addAttribute($attribute);
             }
         } else {
-            throw new Exception("Not supported security scheme");
+            throw new Exception("Unsupported security scheme.");
         }
     }
 }
