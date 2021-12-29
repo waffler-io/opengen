@@ -6,6 +6,7 @@ use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Operation;
 use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\PathItem;
+use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Tag;
 use Exception;
 use JetBrains\PhpStorm\Pure;
@@ -443,10 +444,10 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
 
         $param = new Parameter([
             'name' => $securityRequirement->name, //@phpstan-ignore-line
-            'schema' => [
+            'schema' => new Schema([
                 'type' => 'mixed',
                 'required' => true
-            ],
+            ]),
             'in' => $securityRequirement->in ?? 'header', //@phpstan-ignore-line
             'description' => $securityRequirement->description ?? 'Authorization' //@phpstan-ignore-line
         ]);
