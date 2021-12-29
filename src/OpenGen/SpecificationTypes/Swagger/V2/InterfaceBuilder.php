@@ -103,13 +103,19 @@ class InterfaceBuilder extends OpenApiInterfaceBuilder
                     }
 
                     $mediaTypes = $operation->consumes ?? [];
+                    $parameter->schema = is_array($parameter->schema)
+                        ? new Schema($parameter->schema)
+                        : $parameter->schema;
 
                     $bodyData = [
                         'schema' => $parameter->schema,
                         'required' => $parameter->required,
                     ];
 
-                    if (empty($mediaTypes) && in_array($parameter->schema->type, ['array', 'object'], true)) {
+                    if (
+                        empty($mediaTypes)
+                        && in_array($parameter->schema->type, ['array', 'object'], true)
+                    ) {
                         $mediaTypes[] = 'application/json';
                     }
 

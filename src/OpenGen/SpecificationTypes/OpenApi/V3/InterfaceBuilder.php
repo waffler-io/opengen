@@ -198,12 +198,12 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         $contentSchema = $contentType->schema;
         $parameter = new Parameter([
             'name' => 'requestBody',
-            'schema' => [
+            'schema' => new Schema([
                 'type' => $contentSchema->type,
                 'description' => $contentSchema->description,
                 'nullable' => $contentSchema->nullable,
                 'required' => $contentSchema->required
-            ]
+            ])
         ]);
         $phpParameter = $this->addParameter($method, $parameter);
 
