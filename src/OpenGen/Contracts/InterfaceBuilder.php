@@ -34,7 +34,7 @@ EOL;
     /**
      * @param \cebe\openapi\spec\OpenApi $specification
      *
-     * @return array<non-empty-string, \Nette\PhpGenerator\PhpFile>
+     * @return array<string, \Nette\PhpGenerator\PhpFile>
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */
     public function buildInterfaces(OpenApi $specification): array;

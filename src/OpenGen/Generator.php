@@ -80,7 +80,7 @@ class Generator implements GeneratorInterface
     }
 
     /**
-     * @param array<non-empty-string, \Nette\PhpGenerator\PhpFile> $interfaces
+     * @param array<string, \Nette\PhpGenerator\PhpFile> $interfaces
      *
      * @return array<class-string>
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>

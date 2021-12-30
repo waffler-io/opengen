@@ -92,7 +92,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         $phpFile->addComment(self::PHP_FILE_COMMENT);
 
         if ($tag->description) {
-            $class->addComment($tag->description.PHP_EOL);
+            $class->addComment($tag->description.PHP_EOL.PHP_EOL);
         }
         if ($tag->externalDocs) {
             $class->addComment("@see {$tag->externalDocs->url} {$tag->externalDocs->description}");
@@ -127,6 +127,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         foreach ($this->uses as $use) {
             $phpNamespace->addUse($use);
         }
+        $this->uses = [];
         return $phpFile;
     }
 
@@ -134,12 +135,13 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
      * @param \Nette\PhpGenerator\ClassType                    $class
      * @param string                                           $url
      * @param class-string<\Waffler\Attributes\Contracts\Verb> $verbName
-     * @param mixed                                            $pathItem
+     * @param PathItem                                         $pathItem
      * @param \cebe\openapi\spec\Operation                     $pathOperation
      * @param \cebe\openapi\spec\OpenApi                       $openApi
      *
      * @return void
      * @throws \cebe\openapi\exceptions\TypeErrorException
+     * @throws \Exception
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */
     protected function addMethod(
@@ -166,19 +168,19 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         $this->addAuthorizationParameters($method, $pathOperation, $openApi);
 
         foreach ($pathOperation->parameters as $parameter) {
-            if (!$this->mustIncludeParameter($parameter->in, $parameter->name)) {
+            if (!$this->mustIncludeParameter($parameter->in, $parameter->name)) { //@phpstan-ignore-line
                 continue;
             }
-            $phpParameter = $this->addParameter($method, $parameter);
-            $this->annotateParameter(
-                $parameter,
-                $phpParameter,
-            );
+            $phpParameter = $this->addParameter($method, $parameter); //@phpstan-ignore-line
+            $this->annotateParameter($parameter, $phpParameter); //@phpstan-ignore-line
         }
         $this->orderParametersByRequirement($method);
 
         if ($pathOperation->externalDocs) {
             $method->addComment("@see {$pathOperation->externalDocs->url} {$pathOperation->externalDocs->description}");
+        }
+        if ($pathOperation->deprecated) {
+            $method->addComment("@deprecated This method is deprecated.");
         }
 
         $this->addReturnType($method, $pathOperation);
