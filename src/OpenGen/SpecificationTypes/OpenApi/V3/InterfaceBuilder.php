@@ -18,6 +18,10 @@ use cebe\openapi\spec\PathItem;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Tag;
 use Exception;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\TooManyRedirectsException;
 use JetBrains\PhpStorm\Pure;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Method;
@@ -28,7 +32,6 @@ use Waffler\Attributes\Auth\Basic;
 use Waffler\Attributes\Auth\Bearer;
 use Waffler\Attributes\Auth\Digest;
 use Waffler\Attributes\Request\Body;
-use Waffler\Attributes\Request\Consumes;
 use Waffler\Attributes\Request\FormParam;
 use Waffler\Attributes\Request\HeaderParam;
 use Waffler\Attributes\Request\Json;
@@ -184,6 +187,11 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         }
 
         $this->addReturnType($method, $pathOperation);
+
+        $method->addComment("@throws \\" . ClientException::class);
+        $method->addComment("@throws \\" . ServerException::class);
+        $method->addComment("@throws \\" . ConnectException::class);
+        $method->addComment("@throws \\" . TooManyRedirectsException::class);
     }
 
     /**
@@ -202,8 +210,6 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
             return;
         }
 
-        $this->addUse(Consumes::class);
-        $method->addAttribute(Consumes::class, [$mimeTypes[0]]);
         $contentType = $operation->requestBody->content[$mimeTypes[0]]; //@phpstan-ignore-line
         $contentSchema = $contentType->schema;
         $parameter = new Parameter([
@@ -222,7 +228,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
             $phpParameter->addAttribute(Json::class);
         } else {
             $this->addUse(Body::class);
-            $phpParameter->addAttribute(Body::class);
+            $phpParameter->addAttribute(Body::class, [$mimeTypes[0]]);
         }
     }
 
