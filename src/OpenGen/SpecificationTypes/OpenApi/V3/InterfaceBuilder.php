@@ -481,6 +481,10 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
             'description' => $securityRequirement->description ?? 'Authorization' //@phpstan-ignore-line
         ]);
 
+        if (!$this->mustIncludeParameter($secReqPlace, $param->name)) {
+            return;
+        }
+
         $phpParam = $this->addParameter($method, $param);
         if ($param->in === 'query') {
             $phpParam->addAttribute(QueryParam::class, [$param->name]);
