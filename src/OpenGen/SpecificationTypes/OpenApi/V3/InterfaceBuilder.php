@@ -21,6 +21,7 @@ use Exception;
 use JetBrains\PhpStorm\Pure;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Method;
+use Nette\PhpGenerator\Parameter as PhpParameter;
 use Nette\PhpGenerator\PhpFile;
 use Psr\Http\Message\ResponseInterface;
 use Waffler\Attributes\Auth\Basic;
@@ -64,7 +65,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         $classes = [];
 
         foreach ($specification->tags as $tag) {
-            $interfaceName = StringHelper::studly($tag->name). ($this->options['interface_suffix'] ?? 'ClientInterface');
+            $interfaceName = StringHelper::studly($tag->name).($this->options['interface_suffix'] ?? 'ClientInterface');
             $classes[$interfaceName] = $this->createPhpFile(
                 $specification,
                 $tag,
@@ -79,15 +80,19 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
     /**
      * @throws \Exception
      */
-    protected function createPhpFile(OpenApi $specification, Tag $tag, string $namespace, string $interfaceName): PhpFile
-    {
+    protected function createPhpFile(
+        OpenApi $specification,
+        Tag $tag,
+        string $namespace,
+        string $interfaceName
+    ): PhpFile {
         $phpFile = new PhpFile();
         $phpNamespace = $phpFile->addNamespace($namespace);
         $class = $phpNamespace->addInterface($interfaceName);
         $phpFile->addComment(self::PHP_FILE_COMMENT);
 
         if ($tag->description) {
-            $class->addComment($tag->description . PHP_EOL);
+            $class->addComment($tag->description.PHP_EOL);
         }
         if ($tag->externalDocs) {
             $class->addComment("@see {$tag->externalDocs->url} {$tag->externalDocs->description}");
@@ -159,7 +164,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         $this->addAuthorizationParameters($method, $pathOperation, $openApi);
 
         foreach ($pathOperation->parameters as $parameter) {
-            if (! $this->mustIncludeParameter($parameter->in, $parameter->name)) {
+            if (!$this->mustIncludeParameter($parameter->in, $parameter->name)) {
                 continue;
             }
             $phpParameter = $this->addParameter($method, $parameter);
@@ -168,6 +173,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
                 $phpParameter,
             );
         }
+        $this->orderParametersByRequirement($method);
 
         if ($pathOperation->externalDocs) {
             $method->addComment("@see {$pathOperation->externalDocs->url} {$pathOperation->externalDocs->description}");
@@ -181,7 +187,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
      */
     protected function addRequestBody(Method $method, Operation $operation): void
     {
-        if (! $operation->requestBody) {
+        if (!$operation->requestBody) {
             return;
         }
 
@@ -219,7 +225,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
     protected function addReturnType(Method $method, Operation $pathOperation): void
     {
         foreach ($pathOperation->responses ?? [] as $statusCode => $response) {
-            $statusCode = (int)$statusCode;
+            $statusCode = (int) $statusCode;
 
             if ($statusCode >= 400) {
                 continue;
@@ -290,8 +296,9 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
             default => throw new Exception("Unknown operation type \"$verb\"")
         };
     }
+
     /**
-     * @param string $in
+     * @param string                       $in
      * @param int|string|array<string|int> $search
      *
      * @return bool
@@ -336,7 +343,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
     protected function removePathOperationIdPrefix(string $pathOperationId): string
     {
         $methodPrefixRegex = $this->options['remove_method_prefix'] ?? false;
-        if (! $methodPrefixRegex) {
+        if (!$methodPrefixRegex) {
             return $pathOperationId;
         }
 
@@ -345,7 +352,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
             && str_ends_with($methodPrefixRegex, '/')
             && strlen($methodPrefixRegex) > 2
         ) {
-            return (string)preg_replace($methodPrefixRegex, '', $pathOperationId);
+            return (string) preg_replace($methodPrefixRegex, '', $pathOperationId);
         }
 
         return str_replace($methodPrefixRegex, '', $pathOperationId);
@@ -367,7 +374,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
      */
     protected function annotateParameter(
         Parameter $parameter,
-        \Nette\PhpGenerator\Parameter $phpParameter,
+        PhpParameter $phpParameter,
     ): void {
         switch ($parameter->in) {
             case 'query':
@@ -404,7 +411,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
     protected function addParameter(
         Method $method,
         Parameter $parameter
-    ): \Nette\PhpGenerator\Parameter {
+    ): PhpParameter {
         $paramName = StringHelper::camelCase($parameter->name);
         $phpParameter = $method->addParameter($paramName);
         $paramType = $this->getParameterType($parameter->schema->type);
@@ -483,5 +490,23 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         } else {
             throw new Exception("Unsupported security scheme.");
         }
+    }
+
+    private function orderParametersByRequirement(Method $method): void
+    {
+        $parameters = $method->getParameters();
+        uasort(
+            $parameters,
+            function (PhpParameter $first, PhpParameter $second): int {
+                if (!$first->hasDefaultValue() && !$second->hasDefaultValue()) {
+                    return 0;
+                } elseif ($first->hasDefaultValue() && !$second->hasDefaultValue()) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        );
+        $method->setParameters($parameters);
     }
 }
