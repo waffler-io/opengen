@@ -73,7 +73,8 @@ class ReadingOpenApiSpecTest extends TestCase
                 'ignore' => [
                     'parameters' => [
                         'header' => ['Authorization']
-                    ]
+                    ],
+                    'methods' => ['user/all']
                 ],
                 'remove_method_prefix' => '/\w*\//'
             ]
@@ -89,5 +90,6 @@ class ReadingOpenApiSpecTest extends TestCase
             JsonPlaceholderUser::class,
             $client
         );
+        self::assertFalse((new \ReflectionClass($client))->hasMethod('all'));
     }
 }

@@ -100,16 +100,18 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         if ($specification->externalDocs) {
             $class->addComment("@see {$specification->externalDocs->url} {$specification->externalDocs->description}");
         }
+        $methodsToIgnore = arrayWrap($this->options['ignore']['methods'] ?? []);
         foreach ($specification->paths as $url => $pathItem) {
             foreach ($pathItem->getOperations() as $verbName => $pathOperation) {
                 if (!isset($pathOperation->tags[0])) {
                     throw new Exception("Path operation with no tags are not allowed.");
-                } else {
-                    if (!$pathOperation->operationId) {
-                        throw new Exception("Could not generate method for [$verbName] $url. Reason: Missing operationId.");
-                    } elseif ($pathOperation->tags[0] !== $tag->name) {
-                        continue;
-                    }
+                } elseif (!$pathOperation->operationId) {
+                    throw new Exception("Could not generate method for [$verbName] $url. Reason: Missing operationId.");
+                } elseif (
+                    in_array($pathOperation->operationId, $methodsToIgnore, true)
+                    || $pathOperation->tags[0] !== $tag->name
+                ) {
+                    continue;
                 }
 
                 $this->addMethod(
