@@ -23,7 +23,8 @@ use Waffler\OpenGen\Tests\Fixtures\JsonPlaceholder\UserClientInterface as JsonPl
  * Class ReadingOpenApiSpecTest.
  *
  * @author ErickJMenezes <erickmenezes.dev@gmail.com>
- * @coversNothing
+ * @covers \Waffler\OpenGen\Generator
+ * @covers \Waffler\OpenGen\SpecificationTypes\OpenApi\V3\InterfaceBuilder
  */
 class ReadingOpenApiSpecTest extends TestCase
 {
