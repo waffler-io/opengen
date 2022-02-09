@@ -28,26 +28,26 @@ use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\Parameter as PhpParameter;
 use Nette\PhpGenerator\PhpFile;
 use Psr\Http\Message\ResponseInterface;
-use Waffler\Attributes\Auth\Basic;
-use Waffler\Attributes\Auth\Bearer;
-use Waffler\Attributes\Auth\Digest;
-use Waffler\Attributes\Request\Body;
-use Waffler\Attributes\Request\FormParam;
-use Waffler\Attributes\Request\HeaderParam;
-use Waffler\Attributes\Request\Json;
-use Waffler\Attributes\Request\PathParam;
-use Waffler\Attributes\Request\Produces;
-use Waffler\Attributes\Request\QueryParam;
-use Waffler\Attributes\Verbs\Delete;
-use Waffler\Attributes\Verbs\Get;
-use Waffler\Attributes\Verbs\Head;
-use Waffler\Attributes\Verbs\Options;
-use Waffler\Attributes\Verbs\Patch;
-use Waffler\Attributes\Verbs\Post;
-use Waffler\Attributes\Verbs\Put;
+use Waffler\Waffler\Attributes\Auth\Basic;
+use Waffler\Waffler\Attributes\Auth\Bearer;
+use Waffler\Waffler\Attributes\Auth\Digest;
+use Waffler\Waffler\Attributes\Request\Body;
+use Waffler\Waffler\Attributes\Request\FormParam;
+use Waffler\Waffler\Attributes\Request\HeaderParam;
+use Waffler\Waffler\Attributes\Request\Json;
+use Waffler\Waffler\Attributes\Request\PathParam;
+use Waffler\Waffler\Attributes\Request\Produces;
+use Waffler\Waffler\Attributes\Request\QueryParam;
+use Waffler\Waffler\Attributes\Verbs\Delete;
+use Waffler\Waffler\Attributes\Verbs\Get;
+use Waffler\Waffler\Attributes\Verbs\Head;
+use Waffler\Waffler\Attributes\Verbs\Options;
+use Waffler\Waffler\Attributes\Verbs\Patch;
+use Waffler\Waffler\Attributes\Verbs\Post;
+use Waffler\Waffler\Attributes\Verbs\Put;
 use Waffler\OpenGen\StringHelper;
 
-use function Waffler\arrayWrap;
+use function Waffler\Waffler\arrayWrap;
 
 class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
 {

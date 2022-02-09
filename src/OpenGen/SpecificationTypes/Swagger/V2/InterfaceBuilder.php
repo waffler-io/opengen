@@ -23,7 +23,6 @@ use cebe\openapi\spec\SecurityScheme;
 use cebe\openapi\spec\Tag;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpFile;
-use Psr\Http\Message\ResponseInterface;
 use Waffler\OpenGen\SpecificationTypes\OpenApi\V3\InterfaceBuilder as OpenApiInterfaceBuilder;
 
 class InterfaceBuilder extends OpenApiInterfaceBuilder
