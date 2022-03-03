@@ -18,6 +18,7 @@ composer require waffler/opengen
 ** This package requires PHP 8 or above. **
 
 ## How to use
+
 ```php
 <?php
 
@@ -27,7 +28,7 @@ use Waffler\OpenGen\Generator;
 
 $generator = new Generator();
 
-$generationMap = $generator->fromOpenApiFile(
+$generationMap = $generator->generateFromSpecificationFile(
     'path/to/openapi-file.yaml',
     'path/to/output-dir/',
     'Desired\\Namespace',

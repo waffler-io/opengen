@@ -9,7 +9,7 @@
  * with this source code in the file LICENCE.
  */
 
-namespace Waffler\OpenGen\SpecificationTypes\OpenApi\V3;
+namespace Waffler\OpenGen\Adapters;
 
 use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Operation;
@@ -28,6 +28,7 @@ use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\Parameter as PhpParameter;
 use Nette\PhpGenerator\PhpFile;
 use Psr\Http\Message\ResponseInterface;
+use Waffler\OpenGen\StringHelper;
 use Waffler\Waffler\Attributes\Auth\Basic;
 use Waffler\Waffler\Attributes\Auth\Bearer;
 use Waffler\Waffler\Attributes\Auth\Digest;
@@ -45,18 +46,34 @@ use Waffler\Waffler\Attributes\Verbs\Options;
 use Waffler\Waffler\Attributes\Verbs\Patch;
 use Waffler\Waffler\Attributes\Verbs\Post;
 use Waffler\Waffler\Attributes\Verbs\Put;
-use Waffler\OpenGen\StringHelper;
 
 use function Waffler\Waffler\arrayWrap;
 
-class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
+/**
+ * Adapter for the OpenAPI specification.
+ *
+ * Supported specification version: 3.0.x
+ */
+class OpenApiV3 implements AdapterInterface
 {
     /**
-     * @param array<string, mixed> $options
+     * @var array<class-string>
+     */
+    private array $uses = [];
+
+    /**
+     * @param string                $namespace
+     * @param string                $interfaceSuffix
+     * @param array<string, string> $ignoreParameters
+     * @param array<string>         $ignoreMethods
+     * @param string|null           $removeMethodPrefix
      */
     public function __construct(
-        protected array $options = [],
-        protected array $uses = [],
+        private string $namespace = '',
+        private string $interfaceSuffix = 'ClientInterface',
+        private array $ignoreParameters = [],
+        private array $ignoreMethods = [],
+        private ?string $removeMethodPrefix = null,
     ) {
     }
 
@@ -68,11 +85,11 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         $classes = [];
 
         foreach ($specification->tags as $tag) {
-            $interfaceName = StringHelper::studly($tag->name).($this->options['interface_suffix'] ?? 'ClientInterface');
+            $interfaceName = StringHelper::studly($tag->name).($this->interfaceSuffix);
             $classes[$interfaceName] = $this->createPhpFile(
                 $specification,
                 $tag,
-                $this->options['namespace'],
+                $this->namespace,
                 $interfaceName
             );
         }
@@ -103,7 +120,6 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         if ($specification->externalDocs) {
             $class->addComment("@see {$specification->externalDocs->url} {$specification->externalDocs->description}");
         }
-        $methodsToIgnore = arrayWrap($this->options['ignore']['methods'] ?? []);
         foreach ($specification->paths as $url => $pathItem) {
             foreach ($pathItem->getOperations() as $verbName => $pathOperation) {
                 if (!isset($pathOperation->tags[0])) {
@@ -111,7 +127,7 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
                 } elseif (!$pathOperation->operationId) {
                     throw new Exception("Could not generate method for [$verbName] $url. Reason: Missing operationId.");
                 } elseif (
-                    in_array($pathOperation->operationId, $methodsToIgnore, true)
+                    in_array($pathOperation->operationId, $this->ignoreMethods, true)
                     || $pathOperation->tags[0] !== $tag->name
                 ) {
                     continue;
@@ -135,12 +151,12 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
     }
 
     /**
-     * @param \Nette\PhpGenerator\ClassType                    $class
-     * @param string                                           $url
-     * @param class-string<\Waffler\Attributes\Contracts\Verb> $verbName
-     * @param PathItem                                         $pathItem
-     * @param \cebe\openapi\spec\Operation                     $pathOperation
-     * @param \cebe\openapi\spec\OpenApi                       $openApi
+     * @param \Nette\PhpGenerator\ClassType                            $class
+     * @param string                                                   $url
+     * @param class-string<\Waffler\Waffler\Attributes\Contracts\Verb> $verbName
+     * @param PathItem                                                 $pathItem
+     * @param \cebe\openapi\spec\Operation                             $pathOperation
+     * @param \cebe\openapi\spec\OpenApi                               $openApi
      *
      * @return void
      * @throws \cebe\openapi\exceptions\TypeErrorException
@@ -188,11 +204,42 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
 
         $this->addReturnType($method, $pathOperation);
 
-        $method->addComment("@throws \\" . ClientException::class);
-        $method->addComment("@throws \\" . ServerException::class);
-        $method->addComment("@throws \\" . ConnectException::class);
-        $method->addComment("@throws \\" . TooManyRedirectsException::class);
+        $method->addComment("@throws \\".ClientException::class);
+        $method->addComment("@throws \\".ServerException::class);
+        $method->addComment("@throws \\".ConnectException::class);
+        $method->addComment("@throws \\".TooManyRedirectsException::class);
     }
+
+    protected function removePathOperationIdPrefix(string $pathOperationId): string
+    {
+        $methodPrefixRegex = $this->removeMethodPrefix;
+        if (!$methodPrefixRegex) {
+            return $pathOperationId;
+        }
+
+        if (
+            str_starts_with($methodPrefixRegex, '/')
+            && str_ends_with($methodPrefixRegex, '/')
+            && strlen($methodPrefixRegex) > 2
+        ) {
+            return (string) preg_replace($methodPrefixRegex, '', $pathOperationId);
+        }
+
+        return str_replace($methodPrefixRegex, '', $pathOperationId);
+    }
+
+    /**
+     * @param class-string $object
+     *
+     * @return void
+     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
+     */
+    protected function addUse(string $object): void
+    {
+        $this->uses[] = $object;
+    }
+
+    // helpers
 
     /**
      * @throws \cebe\openapi\exceptions\TypeErrorException
@@ -232,192 +279,6 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         }
     }
 
-    protected function addReturnType(Method $method, Operation $pathOperation): void
-    {
-        foreach ($pathOperation->responses ?? [] as $statusCode => $response) {
-            $statusCode = (int) $statusCode;
-
-            if ($statusCode >= 400) {
-                continue;
-            }
-
-            foreach ($response->content as $mimeType => $mediaType) {
-                if (
-                    !str_contains($mimeType, 'json')
-                    && !in_array(($mediaType->schema->type ?? null), ['array', 'object'], true) //@phpstan-ignore-line
-                ) {
-                    continue;
-                }
-                $this->addUse(Produces::class);
-                $method->addAttribute(Produces::class, [$mimeType]);
-                $method->setReturnType('array');
-                $method->addComment("@return array $response->description");
-                return;
-            }
-        }
-
-        $this->addUse(ResponseInterface::class);
-        $method->setReturnType(ResponseInterface::class);
-        $method->addComment("@return \Psr\Http\Message\ResponseInterface");
-    }
-
-    // helpers
-
-    /**
-     * @param \cebe\openapi\spec\Operation $operation
-     * @param string|array<string>         $mediaTypes
-     *
-     * @return bool
-     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
-     */
-    #[Pure]
-    protected function operationHasAnyMediaTypes(Operation $operation, string|array $mediaTypes): bool
-    {
-        $mediaTypes = arrayWrap($mediaTypes);
-
-        $operationKeys = array_keys($operation->requestBody?->content ?? []);
-
-        foreach ($mediaTypes as $mediaType) {
-            if (in_array($mediaType, $operationKeys, true)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param string $verb
-     *
-     * @return class-string<\Waffler\Attributes\Contracts\Verb>
-     * @throws \Exception
-     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
-     */
-    protected function getVerbAttribute(string $verb): string
-    {
-        return match ($verb) {
-            'get' => Get::class,
-            'post' => Post::class,
-            'put' => Put::class,
-            'patch' => Patch::class,
-            'delete' => Delete::class,
-            'head' => Head::class,
-            'options' => Options::class,
-            default => throw new Exception("Unknown operation type \"$verb\"")
-        };
-    }
-
-    /**
-     * @param string                       $in
-     * @param int|string|array<string|int> $search
-     *
-     * @return bool
-     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
-     */
-
-    #[Pure]
-    protected function mustIncludeParameter(string $in, int|string|array $search): bool
-    {
-        $search = arrayWrap($search);
-        $options = arrayWrap($this->options['ignore']['parameters'][$in] ?? []);
-
-        foreach ($search as $searchedValue) {
-            if (in_array($searchedValue, $options, true)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    protected function allowsNullForType(?string $typeName): bool
-    {
-        if (in_array($typeName, ['apiKey', 'basic', 'oauth2', 'oauth'], true)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected function getParameterType(?string $type): string
-    {
-        return (string) match (is_string($type) ? strtolower($type) : $type) {
-            'integer', 'number', 'numeric' => 'int',
-            'object', 'json', 'array' => 'array',
-            'apikey', 'basic', 'file', null => 'string',
-            'boolean' => 'bool',
-            default => $type
-        };
-    }
-
-    protected function removePathOperationIdPrefix(string $pathOperationId): string
-    {
-        $methodPrefixRegex = $this->options['remove_method_prefix'] ?? false;
-        if (!$methodPrefixRegex) {
-            return $pathOperationId;
-        }
-
-        if (
-            str_starts_with($methodPrefixRegex, '/')
-            && str_ends_with($methodPrefixRegex, '/')
-            && strlen($methodPrefixRegex) > 2
-        ) {
-            return (string) preg_replace($methodPrefixRegex, '', $pathOperationId);
-        }
-
-        return str_replace($methodPrefixRegex, '', $pathOperationId);
-    }
-
-    /**
-     * @param class-string $object
-     *
-     * @return void
-     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
-     */
-    protected function addUse(string $object): void
-    {
-        $this->uses[] = $object;
-    }
-
-    /**
-     * @throws \Exception
-     */
-    protected function annotateParameter(
-        Parameter $parameter,
-        PhpParameter $phpParameter,
-    ): void {
-        switch ($parameter->in) {
-            case 'query':
-            {
-                $this->addUse(QueryParam::class);
-                $phpParameter->addAttribute(QueryParam::class, [$parameter->name]);
-                break;
-            }
-            case 'header':
-            {
-                $this->addUse(HeaderParam::class);
-                $phpParameter->addAttribute(HeaderParam::class, [$parameter->name]);
-                break;
-            }
-            case 'path':
-            {
-                $this->addUse(PathParam::class);
-                $phpParameter->addAttribute(PathParam::class, [$parameter->name]);
-                break;
-            }
-            case 'formData':
-            {
-                $this->addUse(FormParam::class);
-                $phpParameter->addAttribute(FormParam::class, [$parameter->name]);
-                break;
-            }
-            default:
-            {
-                throw new Exception("Unknown parameter position \"$parameter->in\"");
-            }
-        }
-    }
-
     protected function addParameter(
         Method $method,
         Parameter $parameter
@@ -437,6 +298,26 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         $method->addComment("@param $paramType \$$paramName $parameter->description");
         $phpParameter->setType($paramType);
         return $phpParameter;
+    }
+
+    protected function getParameterType(?string $type): string
+    {
+        return (string) match (is_string($type) ? strtolower($type) : $type) {
+            'integer', 'number', 'numeric' => 'int',
+            'object', 'json', 'array' => 'array',
+            'apikey', 'basic', 'file', null => 'string',
+            'boolean' => 'bool',
+            default => $type
+        };
+    }
+
+    protected function allowsNullForType(?string $typeName): bool
+    {
+        if (in_array($typeName, ['apiKey', 'basic', 'oauth2', 'oauth'], true)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -506,6 +387,72 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
         }
     }
 
+    /**
+     * @param string                       $in
+     * @param int|string|array<string|int> $search
+     *
+     * @return bool
+     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
+     */
+    #[Pure]
+    protected function mustIncludeParameter(string $in, int|string|array $search): bool
+    {
+        $search = arrayWrap($search);
+
+        if (!isset($this->ignoreParameters[$in])) {
+            return true;
+        }
+
+        $options = arrayWrap($this->ignoreParameters[$in]);
+
+        foreach ($search as $searchedValue) {
+            if (in_array($searchedValue, $options, true)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected function annotateParameter(
+        Parameter $parameter,
+        PhpParameter $phpParameter,
+    ): void {
+        switch ($parameter->in) {
+            case 'query':
+            {
+                $this->addUse(QueryParam::class);
+                $phpParameter->addAttribute(QueryParam::class, [$parameter->name]);
+                break;
+            }
+            case 'header':
+            {
+                $this->addUse(HeaderParam::class);
+                $phpParameter->addAttribute(HeaderParam::class, [$parameter->name]);
+                break;
+            }
+            case 'path':
+            {
+                $this->addUse(PathParam::class);
+                $phpParameter->addAttribute(PathParam::class, [$parameter->name]);
+                break;
+            }
+            case 'formData':
+            {
+                $this->addUse(FormParam::class);
+                $phpParameter->addAttribute(FormParam::class, [$parameter->name]);
+                break;
+            }
+            default:
+            {
+                throw new Exception("Unknown parameter position \"$parameter->in\"");
+            }
+        }
+    }
+
     private function orderParametersByRequirement(Method $method): void
     {
         $parameters = $method->getParameters();
@@ -522,5 +469,78 @@ class InterfaceBuilder implements \Waffler\OpenGen\Contracts\InterfaceBuilder
             }
         );
         $method->setParameters($parameters);
+    }
+
+    protected function addReturnType(Method $method, Operation $pathOperation): void
+    {
+        foreach ($pathOperation->responses ?? [] as $statusCode => $response) {
+            $statusCode = (int) $statusCode;
+
+            if ($statusCode >= 400) {
+                continue;
+            }
+
+            foreach ($response->content as $mimeType => $mediaType) {
+                if (
+                    !str_contains($mimeType, 'json')
+                    && !in_array(($mediaType->schema->type ?? null), ['array', 'object'], true) //@phpstan-ignore-line
+                ) {
+                    continue;
+                }
+                $this->addUse(Produces::class);
+                $method->addAttribute(Produces::class, [$mimeType]);
+                $method->setReturnType('array');
+                $method->addComment("@return array $response->description");
+                return;
+            }
+        }
+
+        $this->addUse(ResponseInterface::class);
+        $method->setReturnType(ResponseInterface::class);
+        $method->addComment("@return \Psr\Http\Message\ResponseInterface");
+    }
+
+    /**
+     * @param string $verb
+     *
+     * @return class-string<\Waffler\Attributes\Contracts\Verb>
+     * @throws \Exception
+     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
+     */
+    protected function getVerbAttribute(string $verb): string
+    {
+        return match ($verb) {
+            'get' => Get::class,
+            'post' => Post::class,
+            'put' => Put::class,
+            'patch' => Patch::class,
+            'delete' => Delete::class,
+            'head' => Head::class,
+            'options' => Options::class,
+            default => throw new Exception("Unknown operation type \"$verb\"")
+        };
+    }
+
+    /**
+     * @param \cebe\openapi\spec\Operation $operation
+     * @param string|array<string>         $mediaTypes
+     *
+     * @return bool
+     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
+     */
+    #[Pure]
+    protected function operationHasAnyMediaTypes(Operation $operation, string|array $mediaTypes): bool
+    {
+        $mediaTypes = arrayWrap($mediaTypes);
+
+        $operationKeys = array_keys($operation->requestBody?->content ?? []);
+
+        foreach ($mediaTypes as $mediaType) {
+            if (in_array($mediaType, $operationKeys, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

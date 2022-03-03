@@ -12,19 +12,20 @@
 namespace Waffler\OpenGen\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Waffler\Waffler\Client\Factory;
+use Waffler\OpenGen\Adapters\SwaggerV2;
 use Waffler\OpenGen\Generator;
+use Waffler\OpenGen\Tests\Fixtures\JsonPlaceholder\UserClientInterface as JsonPlaceholderUser;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\PetClientInterface;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\StoreClientInterface;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\UserClientInterface;
-use Waffler\OpenGen\Tests\Fixtures\JsonPlaceholder\UserClientInterface as JsonPlaceholderUser;
+use Waffler\Waffler\Client\Factory;
 
 /**
  * Class ReadingOpenApiSpecTest.
  *
  * @author ErickJMenezes <erickmenezes.dev@gmail.com>
  * @covers \Waffler\OpenGen\Generator
- * @covers \Waffler\OpenGen\SpecificationTypes\OpenApi\V3\InterfaceBuilder
+ * @covers \Waffler\OpenGen\Adapters\OpenApiV3
  */
 class ReadingOpenApiSpecTest extends TestCase
 {
@@ -33,12 +34,13 @@ class ReadingOpenApiSpecTest extends TestCase
 
     public function testItMustGenerateSwaggerPetshopApiSpec(): void
     {
-        $generator = new Generator();
+        $generator = new Generator(new SwaggerV2(
+            namespace: 'Waffler\\OpenGen\\Tests\\Fixtures\\SwaggerPetshop',
+        ));
 
-        $generator->fromOpenApiFile(
+        $generator->generateFromSpecificationFile(
             __DIR__.'/../Fixtures/swagger-petshop.json',
             self::PETSHOP_OUTPUT_DIR,
-            'Waffler\\OpenGen\\Tests\\Fixtures\\SwaggerPetshop'
         );
 
         $this->assertDirectoryExists(self::PETSHOP_OUTPUT_DIR);
@@ -64,21 +66,16 @@ class ReadingOpenApiSpecTest extends TestCase
 
     public function testItMustGenerateJsonPlaceholderApiSpec(): void
     {
-        $generator = new Generator();
+        $generator = new Generator(new SwaggerV2(
+            namespace: 'Waffler\\OpenGen\\Tests\\Fixtures\\JsonPlaceholder',
+            ignoreParameters: ['header' => ['Authorization']],
+            ignoreMethods: ['user/all'],
+            removeMethodPrefix: '/\w*\//',
+        ));
 
-        $generator->fromOpenApiFile(
+        $generator->generateFromSpecificationFile(
             __DIR__.'/../Fixtures/swagger-jsonplaceholder.json',
             self::JSONPLACEHOLDER_OUTPUT_DIR,
-            'Waffler\\OpenGen\\Tests\\Fixtures\\JsonPlaceholder',
-            [
-                'ignore' => [
-                    'parameters' => [
-                        'header' => ['Authorization']
-                    ],
-                    'methods' => ['user/all']
-                ],
-                'remove_method_prefix' => '/\w*\//'
-            ]
         );
 
         $this->assertDirectoryExists(self::JSONPLACEHOLDER_OUTPUT_DIR);

@@ -9,7 +9,9 @@
  * with this source code in the file LICENCE.
  */
 
-namespace Waffler\OpenGen\Contracts;
+namespace Waffler\OpenGen;
+
+use Waffler\OpenGen\Adapters\AdapterInterface;
 
 /**
  * Interface GeneratorInterface.
@@ -21,18 +23,21 @@ interface GeneratorInterface
     /**
      * Generates waffler interfaces from open-api files.
      *
-     * @param non-empty-string     $openApiFilePath
-     * @param non-empty-string     $outputDir
-     * @param non-empty-string     $classesNamespace
-     * @param array<string, mixed> $options
+     * @param non-empty-string $specificationFilePath
+     * @param non-empty-string $outputDirectory
      *
      * @return array<string, string> InterfaceName => Output file.
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */
-    public function fromOpenApiFile(
-        string $openApiFilePath,
-        string $outputDir,
-        string $classesNamespace,
-        array $options = []
+    public function generateFromSpecificationFile(
+        string $specificationFilePath,
+        string $outputDirectory,
     ): array;
+
+    /**
+     * Retrieves the adapter that is being used to generate the waffler interfaces.
+     *
+     * @return \Waffler\OpenGen\Adapters\AdapterInterface
+     */
+    public function getAdapter(): AdapterInterface;
 }
