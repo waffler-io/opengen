@@ -330,13 +330,14 @@ class OpenApiV3 implements AdapterInterface
      */
     protected function addAuthorizationParameters(Method $method, Operation $pathOperation, OpenApi $openApi): void
     {
-        $globalRequirements = $openApi->security ?? [];
-        $operationRequirements = $pathOperation->security ?? [];
+        $globalRequirements = $openApi->security;
+        $operationRequirements = $pathOperation->security;
+        $allRequirements = array_merge((array)$operationRequirements, (array)$globalRequirements);
 
-        foreach ([...$operationRequirements, ...$globalRequirements] as $securityRequirement) {
+        foreach ($allRequirements as $securityRequirement) {
             $requirements = json_decode(json_encode($securityRequirement->getSerializableData()), true);
 
-            foreach ($requirements as $name => $scopes) {
+            foreach (array_keys($requirements) as $name) {
                 $this->addSecurityRequirementParameter($method, $openApi, $name);
             }
         }
@@ -386,14 +387,6 @@ class OpenApiV3 implements AdapterInterface
         }
     }
 
-    /**
-     * @param string                       $in
-     * @param int|string|array<string|int> $search
-     *
-     * @return bool
-     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
-     */
-    #[Pure]
     protected function mustIncludeParameter(string $in, int|string|array $search): bool
     {
         $search = arrayWrap($search);
@@ -502,7 +495,7 @@ class OpenApiV3 implements AdapterInterface
     /**
      * @param string $verb
      *
-     * @return class-string<\Waffler\Attributes\Contracts\Verb>
+     * @return class-string<\Waffler\Waffler\Attributes\Contracts\Verb>
      * @throws \Exception
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */

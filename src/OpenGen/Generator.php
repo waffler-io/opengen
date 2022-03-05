@@ -47,7 +47,8 @@ class Generator implements GeneratorInterface
     public function generateFromSpecificationFile(
         string $specificationFilePath,
         string $outputDirectory,
-    ): array {
+    ): array
+    {
         $openApi = $this->getReaderForFile($specificationFilePath);
         $interfaces = $this->openApiSpecAdapter->buildInterfaces($openApi);
         return $this->printInterfaces($interfaces, $outputDirectory);
