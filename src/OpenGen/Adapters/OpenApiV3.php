@@ -62,11 +62,11 @@ class OpenApiV3 implements AdapterInterface
     private array $uses = [];
 
     /**
-     * @param string                $namespace
-     * @param string                $interfaceSuffix
-     * @param array<string, string> $ignoreParameters
-     * @param array<string>         $ignoreMethods
-     * @param string|null           $removeMethodPrefix
+     * @param string                              $namespace
+     * @param string                              $interfaceSuffix
+     * @param array<string, string|array<string>> $ignoreParameters
+     * @param array<string>                       $ignoreMethods
+     * @param string|null                         $removeMethodPrefix
      */
     public function __construct(
         private string $namespace = '',
@@ -332,7 +332,7 @@ class OpenApiV3 implements AdapterInterface
     {
         $globalRequirements = $openApi->security;
         $operationRequirements = $pathOperation->security;
-        $allRequirements = array_merge((array)$operationRequirements, (array)$globalRequirements);
+        $allRequirements = array_merge((array) $operationRequirements, (array) $globalRequirements);
 
         foreach ($allRequirements as $securityRequirement) {
             $requirements = json_decode(json_encode($securityRequirement->getSerializableData()), true);
