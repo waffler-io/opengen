@@ -13,14 +13,11 @@ namespace Waffler\OpenGen;
 
 use cebe\openapi\Reader;
 use cebe\openapi\spec\OpenApi;
-use Exception;
 use InvalidArgumentException;
 use Nette\PhpGenerator\PsrPrinter;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
 use Waffler\OpenGen\Adapters\AdapterInterface;
-use Waffler\OpenGen\Adapters\OpenApiV3;
-use Waffler\OpenGen\Adapters\SwaggerV2;
 
 /**
  * Class Generator.
@@ -31,8 +28,8 @@ class Generator implements GeneratorInterface
 {
     public function __construct(
         private AdapterInterface $openApiSpecAdapter,
-    )
-    { }
+    ) {
+    }
 
     /**
      * @inheritDoc
@@ -78,26 +75,6 @@ class Generator implements GeneratorInterface
     }
 
     /**
-     * @param \cebe\openapi\spec\OpenApi $api
-     * @param array<string, mixed>       $options
-     *
-     * @return \Waffler\OpenGen\Adapters\AdapterInterface
-     * @throws \Exception
-     * @author ErickJMenezes <erickmenezes.dev@gmail.com>
-     */
-    private function getInterfaceBuilder(OpenApi $api, array $options): AdapterInterface
-    {
-        if (!is_null($api->openapi)) { //@phpstan-ignore-line
-            return new OpenApiV3($options);
-        } elseif (!is_null($api->swagger)) { //@phpstan-ignore-line
-            return new SwaggerV2($options);
-        }
-
-        //@phpstan-ignore-next-line
-        throw new Exception("Unknown specification file type.");
-    }
-
-    /**
      * @param array<string, \Nette\PhpGenerator\PhpFile> $interfaces
      *
      * @return array<class-string>
@@ -116,7 +93,7 @@ class Generator implements GeneratorInterface
 
         foreach ($interfaces as $name => $phpFile) {
             $classFile = $psrPrinter->printFile($phpFile);
-            $fileName = "$outputDir/$name.php";
+            $fileName = $outputDir.DIRECTORY_SEPARATOR.$name.".php";
             if ($filesystem->exists($fileName)) {
                 $filesystem->remove($fileName);
             }
