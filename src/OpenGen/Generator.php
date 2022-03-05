@@ -102,7 +102,6 @@ class Generator implements GeneratorInterface
             $filesystem->appendToFile($fileName, $classFile);
         }
 
-        // @phpstan-ignore-next-line
         return $classNameFileMap;
     }
 

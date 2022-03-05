@@ -187,11 +187,11 @@ class OpenApiV3 implements AdapterInterface
         $this->addAuthorizationParameters($method, $pathOperation, $openApi);
 
         foreach ($pathOperation->parameters as $parameter) {
-            if (!$this->mustIncludeParameter($parameter->in, $parameter->name)) { //@phpstan-ignore-line
+            if (!$this->mustIncludeParameter($parameter->in, $parameter->name)) {
                 continue;
             }
-            $phpParameter = $this->addParameter($method, $parameter); //@phpstan-ignore-line
-            $this->annotateParameter($parameter, $phpParameter); //@phpstan-ignore-line
+            $phpParameter = $this->addParameter($method, $parameter);
+            $this->annotateParameter($parameter, $phpParameter);
         }
         $this->orderParametersByRequirement($method);
 
@@ -250,14 +250,13 @@ class OpenApiV3 implements AdapterInterface
             return;
         }
 
-        //@phpstan-ignore-next-line
         $mimeTypes = array_keys($operation->requestBody->content);
         $hasMimeTypes = count($mimeTypes) !== 0;
         if (!$hasMimeTypes) {
             return;
         }
 
-        $contentType = $operation->requestBody->content[$mimeTypes[0]]; //@phpstan-ignore-line
+        $contentType = $operation->requestBody->content[$mimeTypes[0]];
         $contentSchema = $contentType->schema;
         $parameter = new Parameter([
             'name' => 'requestBody',
@@ -349,17 +348,17 @@ class OpenApiV3 implements AdapterInterface
      */
     protected function addSecurityRequirementParameter(Method $method, OpenApi $openApi, string $securityName): void
     {
-        $securityRequirement = $openApi->components->securitySchemes[$securityName]; //@phpstan-ignore-line
+        $securityRequirement = $openApi->components->securitySchemes[$securityName];
 
-        $secReqPlace = $securityRequirement->in ?? 'header'; //@phpstan-ignore-line
+        $secReqPlace = $securityRequirement->in ?? 'header';
         $param = new Parameter([
-            'name' => $securityRequirement->name, //@phpstan-ignore-line
+            'name' => $securityRequirement->name,
             'schema' => new Schema([
                 'type' => in_array($secReqPlace, ['header', 'query'], true) ? 'string' : 'mixed',
                 'required' => true
             ]),
             'in' => $secReqPlace,
-            'description' => $securityRequirement->description ?? 'Authorization' //@phpstan-ignore-line
+            'description' => $securityRequirement->description ?? 'Authorization'
         ]);
 
         if (!$this->mustIncludeParameter($secReqPlace, $param->name)) {
@@ -370,7 +369,7 @@ class OpenApiV3 implements AdapterInterface
         if ($param->in === 'query') {
             $phpParam->addAttribute(QueryParam::class, [$param->name]);
         } elseif ($param->in === 'header') {
-            $attribute = match ($securityRequirement->scheme) { //@phpstan-ignore-line
+            $attribute = match ($securityRequirement->scheme) {
                 'bearer' => Bearer::class,
                 'basic' => Basic::class,
                 'digest' => Digest::class,
@@ -483,7 +482,7 @@ class OpenApiV3 implements AdapterInterface
             foreach ($response->content as $mimeType => $mediaType) {
                 if (
                     !str_contains($mimeType, 'json')
-                    && !in_array(($mediaType->schema->type ?? null), ['array', 'object'], true) //@phpstan-ignore-line
+                    && !in_array(($mediaType->schema->type ?? null), ['array', 'object'], true)
                 ) {
                     continue;
                 }
