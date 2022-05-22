@@ -12,33 +12,36 @@
 namespace Waffler\OpenGen\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Waffler\Waffler\Client\Factory;
-use Waffler\OpenGen\Generator;
+use Waffler\OpenGen\Adapters\OpenApiV3Adapter;
+use Waffler\OpenGen\Adapters\SwaggerV2Adapter;
+use Waffler\OpenGen\ClientGenerator;
+use Waffler\OpenGen\Tests\Fixtures\JsonPlaceholder\UserClientInterface as JsonPlaceholderUser;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\PetClientInterface;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\StoreClientInterface;
 use Waffler\OpenGen\Tests\Fixtures\SwaggerPetshop\UserClientInterface;
-use Waffler\OpenGen\Tests\Fixtures\JsonPlaceholder\UserClientInterface as JsonPlaceholderUser;
+use Waffler\Waffler\Client\Factory;
 
 /**
  * Class ReadingOpenApiSpecTest.
  *
  * @author ErickJMenezes <erickmenezes.dev@gmail.com>
- * @covers \Waffler\OpenGen\Generator
- * @covers \Waffler\OpenGen\SpecificationTypes\OpenApi\V3\InterfaceBuilder
+ * @covers \Waffler\OpenGen\ClientGenerator
  */
-class ReadingOpenApiSpecTest extends TestCase
+class ClientGeneratorTest extends TestCase
 {
-    private const PETSHOP_OUTPUT_DIR = __DIR__.'/../Fixtures/SwaggerPetshop';
-    private const JSONPLACEHOLDER_OUTPUT_DIR = __DIR__.'/../Fixtures/JsonPlaceholder';
+    private const PETSHOP_OUTPUT_DIR            = __DIR__.'/../Fixtures/SwaggerPetshop';
+    private const JSONPLACEHOLDER_OUTPUT_DIR    = __DIR__.'/../Fixtures/JsonPlaceholder';
+    private const GITHUB_OUTPUT_DIR             = __DIR__.'/../Fixtures/GitHub';
 
     public function testItMustGenerateSwaggerPetshopApiSpec(): void
     {
-        $generator = new Generator();
+        $generator = new ClientGenerator(new SwaggerV2Adapter(
+            namespace: 'Waffler\\OpenGen\\Tests\\Fixtures\\SwaggerPetshop',
+        ));
 
-        $generator->fromOpenApiFile(
+        $generator->generateFromJsonFile(
             __DIR__.'/../Fixtures/swagger-petshop.json',
             self::PETSHOP_OUTPUT_DIR,
-            'Waffler\\OpenGen\\Tests\\Fixtures\\SwaggerPetshop'
         );
 
         $this->assertDirectoryExists(self::PETSHOP_OUTPUT_DIR);
@@ -64,21 +67,16 @@ class ReadingOpenApiSpecTest extends TestCase
 
     public function testItMustGenerateJsonPlaceholderApiSpec(): void
     {
-        $generator = new Generator();
+        $generator = new ClientGenerator(new SwaggerV2Adapter(
+            namespace: 'Waffler\\OpenGen\\Tests\\Fixtures\\JsonPlaceholder',
+            ignoreParameters: ['header' => ['Authorization']],
+            ignoreMethods: ['user/all'],
+            removeMethodPrefix: '/\w*\//',
+        ));
 
-        $generator->fromOpenApiFile(
+        $generator->generateFromJsonFile(
             __DIR__.'/../Fixtures/swagger-jsonplaceholder.json',
             self::JSONPLACEHOLDER_OUTPUT_DIR,
-            'Waffler\\OpenGen\\Tests\\Fixtures\\JsonPlaceholder',
-            [
-                'ignore' => [
-                    'parameters' => [
-                        'header' => ['Authorization']
-                    ],
-                    'methods' => ['user/all']
-                ],
-                'remove_method_prefix' => '/\w*\//'
-            ]
         );
 
         $this->assertDirectoryExists(self::JSONPLACEHOLDER_OUTPUT_DIR);
@@ -92,5 +90,20 @@ class ReadingOpenApiSpecTest extends TestCase
             $client
         );
         self::assertFalse((new \ReflectionClass($client))->hasMethod('all'));
+    }
+
+    public function testItMustGenerateGitHubApiSpecFromInternetHostedFile(): void
+    {
+        $generator = new ClientGenerator(new OpenApiV3Adapter(
+            namespace: 'Waffler\\OpenGen\\Tests\\Fixtures\\GitHub',
+            removeMethodPrefix: '/\w*\//',
+        ));
+
+        $generator->generateFromJsonFile(
+            'https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json',
+            self::GITHUB_OUTPUT_DIR,
+        );
+
+        $this->assertDirectoryExists(self::GITHUB_OUTPUT_DIR);
     }
 }
