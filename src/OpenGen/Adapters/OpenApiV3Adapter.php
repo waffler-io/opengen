@@ -273,30 +273,47 @@ class OpenApiV3Adapter implements SpecificationAdapterInterface
         }
 
         $mimeTypes = array_keys($operation->requestBody->content);
-        $hasMimeTypes = count($mimeTypes) !== 0;
-        if (!$hasMimeTypes) {
+        $mimeCount = count($mimeTypes);
+        if ($mimeCount === 0) {
             return;
-        }
+        } elseif ($mimeCount === 1) {
+            $contentType = $operation->requestBody->content[$mimeTypes[0]];
+            $contentSchema = $contentType->schema;
+            $phpParameter = $this->addParameter($method, new Parameter([
+                'name' => 'requestBody',
+                'schema' => new Schema([
+                    'type' => $contentSchema->type,
+                    'description' => $contentSchema->description,
+                    'nullable' => $contentSchema->nullable,
+                    'required' => $contentSchema->required
+                ])
+            ]));
 
-        $contentType = $operation->requestBody->content[$mimeTypes[0]];
-        $contentSchema = $contentType->schema;
-        $parameter = new Parameter([
-            'name' => 'requestBody',
-            'schema' => new Schema([
-                'type' => $contentSchema->type,
-                'description' => $contentSchema->description,
-                'nullable' => $contentSchema->nullable,
-                'required' => $contentSchema->required
-            ])
-        ]);
-        $phpParameter = $this->addParameter($method, $parameter);
-
-        if ($mimeTypes[0] === 'application/json') {
-            $this->addUse(Json::class);
-            $phpParameter->addAttribute(Json::class);
+            if ($mimeTypes[0] === 'application/json') {
+                $this->addUse(Json::class);
+                $phpParameter->addAttribute(Json::class);
+            } else {
+                $this->addUse(Body::class);
+                $phpParameter->addAttribute(Body::class, [$mimeTypes[0]]);
+            }
         } else {
+            $phpParameter = $this->addParameter($method, new Parameter([
+                'name' => 'requestBody',
+                'schema' => new Schema([
+                    'type' => 'string',
+                    'description' => $operation->requestBody->description,
+                    'nullable' => false,
+                    'required' => true,
+                ])
+            ]));
             $this->addUse(Body::class);
-            $phpParameter->addAttribute(Body::class, [$mimeTypes[0]]);
+            $phpParameter->addAttribute(Body::class);
+
+            $bodyMimeType = $method->addParameter('requestBodyMimeType', $mimeTypes[0]);
+            $bodyMimeType->setType('string');
+            $this->addUse(HeaderParam::class);
+            $bodyMimeType->addAttribute(HeaderParam::class, ['Content-Type']);
+            $method->addComment('@param string $requestBodyMimeType The mimetype of the request body.');
         }
     }
 
