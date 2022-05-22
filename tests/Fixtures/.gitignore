@@ -1,2 +1,3 @@
-SwaggerPetshop/
-JsonPlaceholder/
+*
+!*.json
+!.gitignore

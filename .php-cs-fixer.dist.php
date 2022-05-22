@@ -14,7 +14,9 @@ $finder = PhpCsFixer\Finder::create()
     ->exclude([
         'vendor',
         '.phpunit.cache',
-        'tests/Fixtures/SwaggerPetshop'
+        'tests/Fixtures/SwaggerPetshop',
+        'tests/Fixtures/JsonPlaceholder',
+        'tests/Fixtures/GitHub',
     ])
     ->in(__DIR__);
 

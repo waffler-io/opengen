@@ -54,7 +54,7 @@ use function Waffler\Waffler\arrayWrap;
  *
  * Supported specification version: 3.0.x
  */
-class OpenApiV3 implements AdapterInterface
+class OpenApiV3Adapter implements SpecificationAdapterInterface
 {
     /**
      * @var array<class-string>
@@ -84,7 +84,7 @@ class OpenApiV3 implements AdapterInterface
     {
         $classes = [];
 
-        foreach ($specification->tags as $tag) {
+        foreach ($this->getTagsFromSpecification($specification) as $tag) {
             $interfaceName = StringHelper::studly($tag->name).($this->interfaceSuffix);
             $classes[$interfaceName] = $this->createPhpFile(
                 $specification,
@@ -95,6 +95,28 @@ class OpenApiV3 implements AdapterInterface
         }
 
         return $classes;
+    }
+
+    protected function getTagsFromSpecification(OpenApi $openApi): array
+    {
+        $tags = $openApi->tags;
+
+        if (!empty($tags)) {
+            return $tags;
+        }
+
+        // If there's no tags, we'll try to get the tags from the paths.
+        foreach ($openApi->paths as $pathItem) {
+            foreach ($pathItem->getOperations() as $operation) {
+                $tags = [...$tags, ...$operation->tags];
+            }
+        }
+
+        // Finally we'll transform the string tags into an array of openapi tag objects with a generic description.
+        return array_map(fn(string $tag) => new Tag([
+            'name' => $tag,
+            'description' => 'No description available.'.PHP_EOL,
+        ]), array_unique($tags));
     }
 
     /**
@@ -284,9 +306,12 @@ class OpenApiV3 implements AdapterInterface
     ): PhpParameter {
         $paramName = StringHelper::camelCase($parameter->name);
         $phpParameter = $method->addParameter($paramName);
-        $paramType = $this->getParameterType($parameter->schema->type);
-        $allowNull = !$parameter->schema->required && $this->allowsNullForType($parameter->schema->type);
-        $defaultValue = $parameter->schema->default;
+        $parameterSchema = $parameter->schema;
+        $paramType = $this->getParameterType($parameterSchema?->type);
+        $allowNull = !is_null($parameterSchema)
+            && !$parameterSchema->required
+            && $this->allowsNullForType($parameterSchema?->type);
+        $defaultValue = $parameterSchema?->default;
         if ($allowNull) {
             $paramType = "null|$paramType";
             $phpParameter->setDefaultValue($defaultValue);
@@ -294,7 +319,7 @@ class OpenApiV3 implements AdapterInterface
             $phpParameter->setDefaultValue($defaultValue);
         }
 
-        $method->addComment("@param $paramType \$$paramName $parameter->description");
+        $method->addComment("@param $paramType \$$paramName {$parameter?->description}");
         $phpParameter->setType($paramType);
         return $phpParameter;
     }

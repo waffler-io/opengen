@@ -3,7 +3,7 @@
     "description": "Waffler client generator using openapi specs",
     "type": "library",
     "require": {
-        "php": ">=8.0",
+        "php": "^8.0",
         "waffler/waffler": "^1.1.1",
         "cebe/php-openapi": "^1.6.0",
         "symfony/filesystem": "^6.0",

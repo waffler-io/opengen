@@ -29,7 +29,7 @@ use Nette\PhpGenerator\PhpFile;
  *
  * Supported specification version: 2.0
  */
-class SwaggerV2 extends OpenApiV3
+class SwaggerV2Adapter extends OpenApiV3Adapter
 {
     protected function createPhpFile(
         OpenApi $specification,

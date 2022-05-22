@@ -24,9 +24,9 @@ composer require waffler/opengen
 
 require __DIR__.'/vendor/autoload.php';
 
-use Waffler\OpenGen\Generator;
+use Waffler\OpenGen\ClientGenerator;
 
-$generator = new Generator();
+$generator = new ClientGenerator();
 
 $generationMap = $generator->generateFromSpecificationFile(
     'path/to/openapi-file.yaml',
