@@ -196,10 +196,13 @@ class OpenApiV3Adapter implements SpecificationAdapterInterface
         $methodName = StringHelper::camelCase($this->removePathOperationIdPrefix($pathOperation->operationId));
         $method = $class->addMethod($methodName);
         if ($pathItem->description) {
-            $method->addComment($pathOperation->description);
+            $method->addComment($pathItem->description);
         }
         if ($pathOperation->description) {
             $method->addComment($pathOperation->description);
+        }
+        if ($pathItem->description || $pathOperation->description) {
+            $method->addComment('');
         }
         $this->addUse($verbName);
         $method->addAttribute($verbName, [$url]);
