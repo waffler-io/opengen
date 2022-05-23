@@ -25,14 +25,15 @@ composer require waffler/opengen
 require __DIR__.'/vendor/autoload.php';
 
 use Waffler\OpenGen\ClientGenerator;
+use \Waffler\OpenGen\Adapters\OpenApiV3Adapter;
 
-$generator = new ClientGenerator();
+$generator = new ClientGenerator(new OpenApiV3Adapter(
+    'FooBar\\Namespace',
+));
 
-$generationMap = $generator->generateFromSpecificationFile(
+$generationMap = $generator->generateFromYamlFile(
     'path/to/openapi-file.yaml',
     'path/to/output-dir/',
-    'Desired\\Namespace',
-    [] // Generation options.
 );
 ```
 
