@@ -128,7 +128,7 @@ class SwaggerV2Adapter extends OpenApiV3Adapter
                 foreach ($operation->parameters as $parameter) {
                     $parameter = $parameter->getSerializableData();
                     $schema = new Schema([
-                        'type' => $parameter->type ?? $parameter?->schema?->type,
+                        'type' => $parameter->type ?? $parameter?->schema?->type ?? $this->guessSchemaType($parameter->schema, $parameter->in),
                         'required' => $parameter->required ?? false,
                         'description' => $parameter->description ?? null
                     ]);
@@ -195,5 +195,13 @@ class SwaggerV2Adapter extends OpenApiV3Adapter
         }
 
         parent::addSecurityRequirementParameter($method, $openApi, $securityName);
+    }
+
+    private function guessSchemaType(object $schema, string $in): string
+    {
+        if ($in === 'body') {
+            return count($schema->parameters ?? []) > 1 ? 'object' : 'array';
+        }
+        return 'string';
     }
 }

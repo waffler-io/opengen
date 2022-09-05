@@ -34,7 +34,15 @@ class StringHelper
             return self::$camelCache[$value];
         }
 
-        $pieces = explode(' ', str_replace(['-', '_', '/', '\\'], ' ', $value));
+        $separators = ['-', '_', '/', '\\'];
+        $pieces = explode(
+            ' ',
+            str_replace(
+                $separators,
+                ' ',
+                self::contains($value, $separators) ? strtolower($value) : $value,
+            )
+        );
 
         $newPieces = [];
         foreach ($pieces as $piece) {
@@ -42,5 +50,21 @@ class StringHelper
         }
 
         return self::$camelCache[$value] = lcfirst(implode('', $newPieces));
+    }
+
+    public static function contains($haystack, $needles, $ignoreCase = false)
+    {
+        if ($ignoreCase) {
+            $haystack = mb_strtolower($haystack);
+            $needles = array_map('mb_strtolower', (array) $needles);
+        }
+
+        foreach ((array) $needles as $needle) {
+            if ($needle !== '' && str_contains($haystack, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -432,9 +432,13 @@ class OpenApiV3Adapter implements SpecificationAdapterInterface
         }
     }
 
-    protected function mustIncludeParameter(string $in, int|string|array $search): bool
+    protected function mustIncludeParameter(?string $in, null|int|string|array $search): bool
     {
-        $search = arrayWrap($search);
+        $search = arrayWrap($search ?? []);
+
+        if (is_null($in)) {
+            return false;
+        }
 
         if (!isset($this->ignoreParameters[$in])) {
             return true;
