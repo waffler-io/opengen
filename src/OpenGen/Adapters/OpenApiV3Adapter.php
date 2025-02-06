@@ -24,6 +24,7 @@ use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\TooManyRedirectsException;
 use JetBrains\PhpStorm\Pure;
 use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\Parameter as PhpParameter;
 use Nette\PhpGenerator\PhpFile;
@@ -186,7 +187,7 @@ class OpenApiV3Adapter implements SpecificationAdapterInterface
      * @author ErickJMenezes <erickmenezes.dev@gmail.com>
      */
     protected function addMethod(
-        ClassType $class,
+        ClassType|InterfaceType $class,
         string $url,
         string $verbName,
         PathItem $pathItem,

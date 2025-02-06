@@ -179,7 +179,7 @@ class SwaggerV2Adapter extends OpenApiV3Adapter
         }
     }
 
-    protected function mustIncludeParameter(string $in, array|int|string $search): bool
+    protected function mustIncludeParameter(?string $in, null|int|string|array $search): bool
     {
         if ($in === 'body') {
             return false;

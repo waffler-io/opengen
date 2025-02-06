@@ -33,6 +33,16 @@ class ClientGeneratorTest extends TestCase
     private const JSONPLACEHOLDER_OUTPUT_DIR    = __DIR__.'/../Fixtures/GeneratedClients/JsonPlaceholder';
     private const GITHUB_OUTPUT_DIR             = __DIR__.'/../Fixtures/GeneratedClients/GitHub';
 
+    private Factory $factory;
+
+    /**
+     * @before
+     */
+    public function setUpFactory(): void
+    {
+        $this->factory = new Factory();
+    }
+
     public function testItMustGenerateSwaggerPetshopApiSpec(): void
     {
         $generator = new ClientGenerator(new SwaggerV2Adapter(
@@ -53,15 +63,15 @@ class ClientGeneratorTest extends TestCase
         $this->assertTrue(interface_exists(UserClientInterface::class));
         $this->assertInstanceOf(
             PetClientInterface::class,
-            Factory::make(PetClientInterface::class)
+            $this->factory->make(PetClientInterface::class)
         );
         $this->assertInstanceOf(
             StoreClientInterface::class,
-            Factory::make(StoreClientInterface::class)
+            $this->factory->make(StoreClientInterface::class)
         );
         $this->assertInstanceOf(
             UserClientInterface::class,
-            Factory::make(UserClientInterface::class)
+            $this->factory->make(UserClientInterface::class)
         );
     }
 
@@ -82,7 +92,7 @@ class ClientGeneratorTest extends TestCase
         $this->assertDirectoryExists(self::JSONPLACEHOLDER_OUTPUT_DIR);
         $this->assertFileExists(self::JSONPLACEHOLDER_OUTPUT_DIR.'/UserClientInterface.php');
         $this->assertTrue(interface_exists(JsonPlaceholderUser::class));
-        $client = Factory::make(JsonPlaceholderUser::class, [
+        $client = $this->factory->make(JsonPlaceholderUser::class, [
             'base_uri' => 'https://jsonplaceholder.typicode.com/'
         ]);
         $this->assertInstanceOf(
